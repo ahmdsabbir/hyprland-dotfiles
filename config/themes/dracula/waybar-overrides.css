@@ -1,0 +1,4 @@
+/* Optional Dracula-specific styling */
+#workspaces button.active {
+  font-weight: bold;
+}
