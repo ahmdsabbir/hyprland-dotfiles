@@ -1,0 +1,24 @@
+# apt packages installed by ./install.sh when "Ubuntu" is chosen.
+# One per line. Blank lines and # comments are ignored.
+
+# Hyprland ecosystem (from ppa:cppiber/hyprland on Ubuntu)
+hyprland
+xdg-desktop-portal-hyprland
+hyprland-qtutils
+hyprlauncher
+hyprlock
+hypridle
+
+# Apps referenced by the config
+kitty
+waybar
+nautilus
+
+# Used by keybinds (wpctl, brightness, media keys)
+wireplumber
+brightnessctl
+playerctl
+
+# Dotfiles tooling
+git
+stow

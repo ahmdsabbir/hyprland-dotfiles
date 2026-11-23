@@ -1,0 +1,136 @@
+/* Waybar style: transparent bar, flat pills, subtle rounding (matches Hyprland's 6). */
+@import "themes/light.css";
+
+* {
+    font-family: "Liberation Mono", "FantasqueSansM Nerd Font", monospace;
+    font-size: 13px;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+window#waybar {
+    background: transparent;
+    color: @subtext;
+}
+
+/* --- Workspaces --------------------------------------------------------- */
+
+#workspaces {
+    background: @surface2;
+    border-radius: 6px;
+    padding: 4px 3px;
+}
+
+#workspaces button {
+    min-width: 26px;
+    padding: 0;
+    margin: 0 2px;
+    border-radius: 4px;
+    background: @overlay;
+}
+
+#workspaces button.active {
+    min-width: 48px;
+    background: @accent;
+}
+
+#workspaces button.empty {
+    background: alpha(@overlay, 0.6);
+}
+
+#workspaces button:hover {
+    background: @border;
+}
+
+#workspaces button.urgent {
+    background: @green;
+}
+
+/* --- Status pills ------------------------------------------------------- */
+
+#pulseaudio,
+#network,
+#battery,
+#clock {
+    background: @surface2;
+    color: @subtext;
+    padding: 0 10px;
+    border-radius: 6px;
+}
+
+#pulseaudio.muted {
+    background: @overlay;
+    color: @accent;
+}
+
+#network.disconnected {
+    color: @muted;
+}
+
+#battery.warning:not(.charging) {
+    color: @text;
+}
+
+#battery.critical:not(.charging) {
+    background: @accent;
+    color: @accent_fg;
+}
+
+/* --- Power button and its dropdown menu --------------------------------- */
+
+#custom-power {
+    background: @surface2;
+    color: @subtext;
+    padding: 0 10px;
+    border-radius: 6px;
+}
+
+#custom-power:hover {
+    background: @overlay;
+    color: @text;
+}
+
+menu {
+    background: @surface;
+    border: 1px solid @border;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+menuitem {
+    padding: 5px 12px;
+    border-radius: 4px;
+}
+
+menuitem label {
+    color: @text;
+}
+
+menuitem:hover {
+    background: @accent;
+}
+
+menuitem:hover label {
+    color: @accent_fg;
+}
+
+menu separator {
+    background: @overlay;
+    min-height: 1px;
+    margin: 4px 6px;
+}
+
+/* --- Tooltips ----------------------------------------------------------- */
+
+tooltip {
+    background: @surface;
+    border: 1px solid @border;
+    border-radius: 6px;
+}
+
+tooltip label {
+    color: @text;
+}

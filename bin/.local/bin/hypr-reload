@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Reload every config in this setup.
+#
+# Usage: hypr-reload [-q|--quiet] [-n|--notify]
+#
+#   -q, --quiet    Only print errors.
+#   -n, --notify   Also send a desktop notification (default when not run
+#                  from a terminal, e.g. from a keybind).
+#
+# Steps:
+#   1. Verify the Hyprland config; stop here if it has errors.
+#   2. Reload Hyprland and report errors from the running session.
+#   3. Signal Waybar (USR2) and kitty (USR1) to reload, if running.
+#   4. Restart hypridle, if it's running.
+#
+# Exit status: 0 on success, 1 if the Hyprland config has errors.
+
+set -uo pipefail
+
+QUIET=0
+NOTIFY=0
+[[ -t 1 ]] || NOTIFY=1
+
+while (( $# )); do
+    case "$1" in
+        -q|--quiet)  QUIET=1 ;;
+        -n|--notify) NOTIFY=1 ;;
+        -h|--help)   sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *)           echo "Unknown option: $1 (see --help)" >&2; exit 2 ;;
+    esac
+    shift
+done
+
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland.lua"
+IN_HYPRLAND=0
+[[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && command -v hyprctl >/dev/null && IN_HYPRLAND=1
+
+ok()   { (( QUIET )) || printf '\033[1;32m ok\033[0m %s\n' "$*"; }
+skip() { (( QUIET )) || printf '\033[2m  - %s\033[0m\n' "$*"; }
+err()  { printf '\033[1;31merr\033[0m %s\n' "$*" >&2; }
+
+# Desktop notification, only if a notification daemon is running.
+notify() {
+    (( NOTIFY )) || return 0
+    command -v notify-send >/dev/null || return 0
+    busctl --user list 2>/dev/null | grep -q org.freedesktop.Notifications || return 0
+    timeout 2 notify-send -a hypr-reload "$@" 2>/dev/null || true
+}
+
+fail() {
+    err "$1"
+    [[ -n "${2:-}" ]] && printf '%s\n' "$2" >&2
+    notify -u critical "Config not reloaded" "${2:-$1}"
+    exit 1
+}
+
+# --- 1. Verify --------------------------------------------------------------
+
+if command -v Hyprland >/dev/null && [[ -f "$CFG" ]]; then
+    out="$(cd / && Hyprland --verify-config -c "$CFG" 2>&1)"
+    # Keep only what follows the "Config parsing result" header.
+    result="$(printf '%s\n' "$out" | sed -n '/Config parsing result/,$p' | sed '1d;/^[[:space:]]*$/d')"
+    if [[ "$result" != "config ok" ]]; then
+        fail "Hyprland config has errors; nothing reloaded." "$result"
+    fi
+    ok "Hyprland config is valid"
+else
+    skip "Hyprland or $CFG not found"
+fi
+
+# --- 2. Hyprland ------------------------------------------------------------
+
+if (( IN_HYPRLAND )); then
+    hyprctl reload >/dev/null
+    # The live session resolves modules via ~/.config/hypr, which can differ
+    # from what --verify-config saw (e.g. a folder that isn't linked yet).
+    errors="$(hyprctl configerrors 2>/dev/null | sed '/^[[:space:]]*$/d')"
+    if [[ -n "$errors" ]]; then
+        fail "Hyprland reloaded with errors." "$(printf '%s\n' "$errors" | head -5)"
+    fi
+    ok "Hyprland reloaded"
+else
+    skip "Hyprland: not in a Hyprland session"
+fi
+
+# --- 3. Waybar, kitty -------------------------------------------------------
+
+if pkill -USR2 -x waybar 2>/dev/null; then
+    ok "Waybar reloaded"
+else
+    skip "Waybar: not running"
+fi
+
+if pkill -USR1 -x kitty 2>/dev/null; then
+    ok "kitty reloaded"
+else
+    skip "kitty: not running"
+fi
+
+# --- 4. hypridle ------------------------------------------------------------
+
+if systemctl --user is-active --quiet hypridle 2>/dev/null; then
+    systemctl --user restart hypridle && ok "hypridle restarted"
+elif pgrep -x hypridle >/dev/null; then
+    pkill -x hypridle
+    setsid -f hypridle >/dev/null 2>&1 && ok "hypridle restarted"
+else
+    skip "hypridle: not running"
+fi
+
+notify "Config reloaded" "Hyprland, Waybar, kitty and hypridle are up to date."
+exit 0

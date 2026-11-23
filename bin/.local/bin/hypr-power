@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Log out, reboot or shut down, after a confirmation dialog.
+#
+# Usage: hypr-power logout|reboot|shutdown [--yes]
+#
+#   --yes   Skip the confirmation dialog.
+#
+# Used by the Waybar power buttons. Confirmation uses zenity when available;
+# without it (and without --yes) nothing happens, to avoid accidents.
+
+set -uo pipefail
+
+action="${1:-}"
+assume_yes=0
+[[ "${2:-}" == "--yes" ]] && assume_yes=1
+
+case "$action" in
+    logout)   title="Log out?";   text="End this Hyprland session?";  ok="Log out" ;;
+    reboot)   title="Restart?";   text="Restart the computer?";        ok="Restart" ;;
+    shutdown) title="Shut down?"; text="Shut down the computer?";      ok="Shut down" ;;
+    -h|--help|"") sed -n '2,9p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unknown action: $action (logout|reboot|shutdown)" >&2; exit 2 ;;
+esac
+
+if (( ! assume_yes )); then
+    command -v zenity >/dev/null || { echo "zenity not installed; use --yes to skip confirmation." >&2; exit 1; }
+    zenity --question --title="$title" --text="$text" \
+        --ok-label="$ok" --cancel-label="Cancel" --width=280 2>/dev/null || exit 0
+fi
+
+case "$action" in
+    logout)
+        # Prefer hyprshutdown (closes apps gracefully) if installed, like the stock SUPER+M bind.
+        if command -v hyprshutdown >/dev/null; then
+            hyprshutdown
+        else
+            hyprctl dispatch 'hl.dsp.exit()'
+        fi
+        ;;
+    reboot)   systemctl reboot ;;
+    shutdown) systemctl poweroff ;;
+esac
