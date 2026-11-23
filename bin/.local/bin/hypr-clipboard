@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Clipboard history: pick a previous copy in rofi and copy it again.
+#
+# Usage: hypr-clipboard          pick from history (SUPER+SHIFT+V)
+#        hypr-clipboard --clear  wipe the history
+#
+# History is recorded by `wl-paste --watch cliphist store` (started in
+# Hyprland's autostart). Needs cliphist and wl-clipboard.
+
+set -uo pipefail
+
+for cmd in cliphist wl-copy; do
+    command -v "$cmd" >/dev/null || { echo "$cmd is not installed (see packages.ubuntu.txt)" >&2; exit 1; }
+done
+
+if [[ "${1:-}" == "--clear" ]]; then
+    cliphist wipe
+    exit 0
+fi
+
+# cliphist lines are "<id>\t<preview>": show only the preview column, but
+# return the whole line so decode gets the exact entry.
+choice="$(cliphist list | rofi -dmenu -i -p clipboard -no-show-icons \
+    -display-columns 2 -display-column-separator $'\t' \
+    -theme-str 'entry { placeholder: "Search clipboard history"; } element { padding: 10px 14px; }')" || exit 0
+[[ -n "$choice" ]] || exit 0
+
+printf '%s' "$choice" | cliphist decode | wl-copy

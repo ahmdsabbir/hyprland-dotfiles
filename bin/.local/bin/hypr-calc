@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Calculator in rofi (SUPER+=), powered by qalc (libqalculate).
+#
+# Usage: hypr-calc            open the calculator
+#
+# Type an expression and press Enter: "2^10", "5 km to mi", "15% of 80",
+# "sqrt(2)", "now + 3 days". The result appears as a row; Enter on it copies
+# it (wl-copy) and closes. Keep typing to calculate something else.
+#
+# Internally rofi calls this script in "script mode" (ROFI_RETV set).
+
+set -uo pipefail
+
+# Launched by the user: hand over to rofi, which calls us back below.
+if [[ -z "${ROFI_RETV:-}" ]]; then
+    command -v qalc >/dev/null || { echo "qalc is not installed (see packages.ubuntu.txt)" >&2; exit 1; }
+    exec rofi -show calc -modi "calc:$0" -no-show-icons
+fi
+
+hint() {
+    printf '\0prompt\x1fcalc\n'
+    printf '\0message\x1f%s\n' "$1"
+}
+
+case "$ROFI_RETV" in
+    0)  # Opened
+        hint "Type an expression, Enter to calculate · e.g. 2^10, 5 km to mi"
+        ;;
+    1)  # Picked a result row: copy it and close (no output = rofi exits)
+        printf '%s' "${ROFI_INFO:-$1}" | wl-copy
+        ;;
+    2)  # Typed an expression and pressed Enter
+        expr="$1"
+        # "5 km to mi" -> "5 km to -mi": a leading "-" makes qalc give a plain
+        # decimal (3.1 mi) instead of mixed units (3 mi + 188 yd + ...).
+        q="$(printf '%s' "$expr" | sed -E 's/([[:space:]](to|->)[[:space:]]+)([^-+[:space:]])/\1-\3/')"
+        result="$(qalc -t -- "$q" 2>/dev/null | tail -n1)"
+        if [[ -z "$result" ]]; then
+            hint "Couldn't calculate: $expr"
+        else
+            hint "$expr ="
+            # Row shows the result; info carries the raw value to copy.
+            printf '%s\0info\x1f%s\n' "$result" "$result"
+        fi
+        ;;
+esac

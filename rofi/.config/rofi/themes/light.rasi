@@ -1,0 +1,132 @@
+/* Light: matches the "hyprink monotone" launcher.
+ * Palette: keep in sync with hypr/.config/hypr/themes/light.lua. */
+
+* {
+    base:      #d9d9d9;
+    surface:   #cccccc;
+    surface2:  #c2c2c2;
+    overlay:   #a8a8a8;
+    border-c:  #7a7a7a;
+    muted:     #828282;
+    subtext:   #595959;
+    text:      #3b3b3b;
+    accent:    #474747;
+    accent-fg: #c8c8c8;
+
+    font:             "Liberation Mono 12";
+    background-color: transparent;
+    text-color:       @text;
+}
+
+/* --- Panel ---------------------------------------------------------------- */
+
+window {
+    location:         center;
+    anchor:           center;
+    width:            764px;
+    padding:          28px;
+    border:           2px solid;
+    border-color:     @accent;
+    border-radius:    8px;
+    background-color: @surface;
+}
+
+mainbox {
+    spacing:  16px;
+    children: [ inputbar, message, listview ];
+}
+
+/* --- Search box: "Type to filter" ... "/" ---------------------------------- */
+
+inputbar {
+    padding:  6px 4px;
+    spacing:  12px;
+    children: [ entry, textbox-slash ];
+}
+
+entry {
+    placeholder:       "Type to filter";
+    placeholder-color: @muted;
+    text-color:        @text;
+    cursor:            text;
+}
+
+textbox-slash {
+    expand:     false;
+    str:        "/";
+    text-color: @muted;
+}
+
+/* Messages from scripts (e.g. the calculator's hint/result line). */
+message {
+    padding: 0 4px;
+}
+
+textbox {
+    text-color: @subtext;
+}
+
+/* --- Results -------------------------------------------------------------- */
+
+listview {
+    lines:        6;
+    columns:      1;
+    spacing:      2px;
+    fixed-height: true;
+    scrollbar:    false;
+    cycle:        true;
+}
+
+/* 80px rows: 8 + (8 + 48 + 8) + 8 */
+element {
+    padding:       8px;
+    spacing:       30px;
+    border-radius: 8px;
+    children:      [ element-icon, element-text ];
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+    text-color:       @subtext;
+}
+
+element selected.normal {
+    background-color: @accent;
+    text-color:       @accent-fg;
+}
+
+element normal.urgent,
+element alternate.urgent  { text-color: @text; }
+element selected.urgent   { background-color: @accent; text-color: @accent-fg; }
+element normal.active,
+element alternate.active  { text-color: @text; }
+element selected.active   { background-color: @accent; text-color: @accent-fg; }
+
+/* Icon on its own tile; on the dark selected row the tile stays light. */
+element-icon {
+    size:             48px;
+    padding:          8px;
+    border-radius:    8px;
+    background-color: transparent;
+}
+
+element-icon selected {
+    background-color: @surface;
+}
+
+element-text {
+    vertical-align:   0.5;
+    background-color: transparent;
+    text-color:       inherit;
+    highlight:        bold;
+}
+
+/* Error dialogs (e.g. rofi config errors) */
+error-message {
+    padding:          20px;
+    border:           2px solid;
+    border-color:     @accent;
+    border-radius:    8px;
+    background-color: @surface;
+}

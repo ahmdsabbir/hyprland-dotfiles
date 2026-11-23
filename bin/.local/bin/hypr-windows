@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Window switcher: pick any open window (all workspaces) in rofi.
+#
+# Usage: hypr-windows
+#
+# Lists windows most-recently-focused first, with app icons; selecting one
+# focuses it (switching workspace if needed).
+
+set -uo pipefail
+
+clients="$(hyprctl clients -j)" || exit 1
+
+# One line per window: "<address>\t<label>\t<icon>", ordered by focus history.
+mapfile -t rows < <(printf '%s' "$clients" | python3 -c '
+import json, sys
+cs = [c for c in json.load(sys.stdin) if c.get("mapped", True) and c["address"]]
+cs.sort(key=lambda c: c.get("focusHistoryID", 999))
+for c in cs:
+    cls   = c["class"] or "?"
+    title = (c["title"] or "").replace("\n", " ").replace("\t", " ")[:70]
+    print(c["address"] + "\t" + title + "  [" + c["workspace"]["name"] + "]" + "\t" + cls.lower())
+')
+
+(( ${#rows[@]} )) || exit 0
+
+# rofi rows: "label\0icon\x1f<icon-name>"; -format i returns the row index.
+idx="$(for r in "${rows[@]}"; do
+        IFS=$'\t' read -r _ label icon <<< "$r"
+        printf '%s\0icon\x1f%s\n' "$label" "$icon"
+    done | rofi -dmenu -i -format i -p windows -theme-str 'entry { placeholder: "Switch to window"; }')" || exit 0
+
+[[ "$idx" =~ ^[0-9]+$ ]] && (( idx < ${#rows[@]} )) || exit 0
+addr="${rows[$idx]%%$'\t'*}"
+
+hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })" >/dev/null

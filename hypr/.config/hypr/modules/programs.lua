@@ -4,6 +4,6 @@
 return {
     terminal    = "kitty",
     fileManager = "nautilus",
-    menu        = "hyprlauncher",
+    menu        = "rofi -show drun",
     mainMod     = "SUPER", -- "Windows" key
 }

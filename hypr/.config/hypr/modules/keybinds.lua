@@ -17,6 +17,14 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 -- Reload every config (Hyprland, Waybar, kitty, hypridle)
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-reload"))
 
+-- Menus (rofi). SUPER+R above opens the app launcher.
+hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd("rofimoji --action copy --skin-tone neutral")) -- emoji / symbols
+hl.bind(mainMod .. " + equal",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-calc"))          -- calculator
+hl.bind(mainMod .. " + Tab",        hl.dsp.exec_cmd("$HOME/.local/bin/hypr-windows"))       -- window switcher
+hl.bind(mainMod .. " + SHIFT + V",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-clipboard"))     -- clipboard history
+hl.bind(mainMod .. " + L",          hl.dsp.exec_cmd("$HOME/.local/bin/hypr-power lock"))    -- lock screen
+hl.bind(mainMod .. " + Escape",     hl.dsp.exec_cmd("$HOME/.local/bin/hypr-power menu"))    -- power menu
+
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

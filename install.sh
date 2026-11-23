@@ -187,7 +187,7 @@ install_packages() {
     [[ "$DISTRO" == none ]] && { log "Skipping packages."; return; }
     if ! is_supported "$DISTRO"; then
         warn "$DISTRO isn't supported yet: skipping packages."
-        warn "Install Hyprland, kitty, waybar, hyprlauncher, hyprlock, hypridle and stow yourself."
+        warn "Install the packages listed in packages.ubuntu.txt (names may differ) yourself."
         return
     fi
     log "Installing packages for: $DISTRO"

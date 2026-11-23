@@ -5,7 +5,6 @@
 hyprland
 xdg-desktop-portal-hyprland
 hyprland-qtutils
-hyprlauncher
 hyprlock
 hypridle
 
@@ -13,11 +12,22 @@ hypridle
 kitty
 waybar
 nautilus
+# Audio mixer (Waybar right-click on volume/mic), opens in kitty
+pulsemixer
 
 # Used by keybinds (wpctl, brightness, media keys)
 wireplumber
 brightnessctl
 playerctl
+
+# Launcher and menus: rofi; emoji picker; calculator engine
+rofi
+rofimoji
+qalc
+
+# Clipboard: copy from menus (emoji, calculator) + history (SUPER+SHIFT+V)
+wl-clipboard
+cliphist
 
 # Dotfiles tooling
 git

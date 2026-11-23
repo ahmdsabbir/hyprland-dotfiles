@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Log out, reboot or shut down, after a confirmation dialog.
+# Lock, log out, reboot or shut down (the last three after a confirmation dialog).
 #
-# Usage: hypr-power logout|reboot|shutdown [--yes]
+# Usage: hypr-power lock|logout|reboot|shutdown [--yes]
+#        hypr-power menu      pick one in rofi (SUPER+Escape)
 #
 #   --yes   Skip the confirmation dialog.
 #
@@ -14,12 +15,35 @@ action="${1:-}"
 assume_yes=0
 [[ "${2:-}" == "--yes" ]] && assume_yes=1
 
+if [[ "$action" == lock ]]; then
+    # No confirmation: locking is harmless. One hyprlock at a time.
+    pidof hyprlock >/dev/null || exec hyprlock
+    exit 0
+fi
+
+if [[ "$action" == menu ]]; then
+    # Rows with icons; -format i returns the picked row's index.
+    choice="$(printf '%s\0icon\x1f%s\n' \
+            "Lock"      system-lock-screen \
+            "Log out"   system-log-out \
+            "Restart"   system-reboot \
+            "Shut down" system-shutdown \
+        | rofi -dmenu -i -format i -p power -theme-str 'entry { placeholder: "Power"; } listview { lines: 4; }')" || exit 0
+    case "$choice" in
+        0) exec "$0" lock ;;
+        1) exec "$0" logout ;;
+        2) exec "$0" reboot ;;
+        3) exec "$0" shutdown ;;
+        *) exit 0 ;;
+    esac
+fi
+
 case "$action" in
     logout)   title="Log out?";   text="End this Hyprland session?";  ok="Log out" ;;
     reboot)   title="Restart?";   text="Restart the computer?";        ok="Restart" ;;
     shutdown) title="Shut down?"; text="Shut down the computer?";      ok="Shut down" ;;
-    -h|--help|"") sed -n '2,9p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) echo "Unknown action: $action (logout|reboot|shutdown)" >&2; exit 2 ;;
+    -h|--help|"") sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unknown action: $action (lock|logout|reboot|shutdown|menu)" >&2; exit 2 ;;
 esac
 
 if (( ! assume_yes )); then

@@ -10,6 +10,10 @@ hl.config({
         disable_hyprland_logo    = true,
         disable_splash_rendering = true,
         background_color         = theme.rgb("base"),
+
+        -- If hyprlock ever crashes, let a new hyprlock take over the lock
+        -- (otherwise you'd be stuck on Hyprland's "lockdead" screen).
+        allow_session_lock_restore = true,
     },
 
     layers = {

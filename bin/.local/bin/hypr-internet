@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Internet status for Waybar (custom/internet): is the internet reachable,
+# not just the Wi-Fi/cable link?
+#
+# Usage: hypr-internet          print Waybar JSON (run every 30 s by Waybar)
+#        hypr-internet --open   on click: open the login page if a captive
+#                               portal is detected, otherwise just re-check
+#
+# Uses NetworkManager's connectivity check (one tiny HTTP request to the URI in
+# NetworkManager's [connectivity] config, e.g. connectivity-check.ubuntu.com).
+
+set -uo pipefail
+
+if [[ "${1:-}" == "--open" ]]; then
+    if [[ "$(nmcli networking connectivity 2>/dev/null)" == portal ]]; then
+        # Any plain-HTTP page triggers the portal's redirect to its login page.
+        xdg-open "http://connectivity-check.ubuntu.com/" >/dev/null 2>&1 &
+    fi
+    exit 0
+fi
+
+state="$(timeout 15 nmcli networking connectivity check 2>/dev/null || echo unknown)"
+now="$(date +%H:%M:%S)"
+
+case "$state" in
+    full)    text="󰖟";          class="online";  tip="Internet: online" ;;
+    limited) text="󰖟 limited";  class="limited"; tip="Connected to the network, but no internet" ;;
+    portal)  text="󰖟 login";    class="portal";  tip="Login required (captive portal) · click to open it" ;;
+    none)    text="󰖪 offline";  class="offline"; tip="No network connection" ;;
+    *)       text="󰖟 ?";        class="unknown"; tip="Internet status unknown (NetworkManager check unavailable)" ;;
+esac
+
+printf '{"text": "%s", "class": "%s", "tooltip": "%s · checked %s"}\n' "$text" "$class" "$tip" "$now"

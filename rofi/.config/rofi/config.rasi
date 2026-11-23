@@ -1,0 +1,20 @@
+/* rofi: app launcher and menus. Runs only while open (no daemon).
+ * Docs: man rofi, man rofi-theme
+ * Used by: SUPER+R (apps), hypr-calc, hypr-windows, hypr-clipboard,
+ *          hypr-power menu, rofimoji. */
+
+configuration {
+    modi:                "drun,run";
+    show-icons:          true;
+    terminal:            "kitty";
+
+    /* Apps: name only; most-used first (rofi keeps launch history). */
+    drun-display-format: "{name}";
+    disable-history:     false;
+
+    case-sensitive:      false;
+    matching:            "normal";
+    cycle:               true;
+}
+
+@theme "~/.config/rofi/themes/light.rasi"

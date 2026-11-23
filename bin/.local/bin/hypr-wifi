@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# Wi-Fi menu in rofi (Waybar network pill, left click).
+#
+# Usage: hypr-wifi
+#
+# Shows the current network and nearby networks (strongest first). Pick one to
+# connect (asks for a password only for new secured networks), or disconnect,
+# rescan, turn Wi-Fi on/off, or open full network settings (nmtui).
+# Needs NetworkManager (nmcli).
+
+set -uo pipefail
+
+SELF="$0"
+command -v nmcli >/dev/null || { rofi -e "NetworkManager (nmcli) is not installed."; exit 1; }
+
+settings() { exec kitty --class hypr-nmtui -e nmtui; }
+
+menu() {  # rows on stdin; prints picked index
+    rofi -dmenu -i -format i -no-show-icons -p wifi \
+        -theme-str "entry { placeholder: \"$1\"; } element { padding: 10px 14px; }"
+}
+
+fail() { rofi -e "$1"; exit 1; }
+
+# --- No adapter: offer settings only -------------------------------------------
+
+if ! nmcli -t -f TYPE device 2>/dev/null | grep -qx wifi; then
+    pick="$(printf '%s\n' "󰒓  Network settings" | menu "No Wi-Fi adapter on this machine")" || exit 0
+    [[ "$pick" == 0 ]] && settings
+    exit 0
+fi
+
+# --- Wi-Fi off: offer to turn it on --------------------------------------------
+
+if [[ "$(nmcli radio wifi)" != enabled ]]; then
+    pick="$(printf '%s\n' "󰖩  Turn Wi-Fi on" "󰒓  Network settings" | menu "Wi-Fi is off")" || exit 0
+    case "$pick" in
+        0) nmcli radio wifi on && sleep 2 && exec "$SELF" ;;
+        1) settings ;;
+    esac
+    exit 0
+fi
+
+# --- Build the menu --------------------------------------------------------------
+
+# Active Wi-Fi connection name (may differ from the SSID) and saved Wi-Fi names.
+active="$(nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2=="802-11-wireless"{print $1; exit}')"
+mapfile -t saved < <(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="802-11-wireless"{print $1}')
+
+# Networks as "inuse<TAB>signal<TAB>secured(0/1)<TAB>ssid", deduped, strongest first.
+mapfile -t nets < <(nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list --rescan auto 2>/dev/null | python3 -c '
+import sys, re
+best = {}
+for line in sys.stdin:
+    parts = re.split(r"(?<!\\):", line.rstrip("\n"), maxsplit=3)
+    if len(parts) != 4: continue
+    inuse, sig, sec, ssid = parts
+    ssid = ssid.replace("\\:", ":").replace("\\\\", "\\")
+    if not ssid: continue
+    sig = int(sig or 0)
+    secured = 0 if sec in ("", "--") else 1
+    cur = best.get(ssid)
+    if cur is None or inuse == "*" or (sig > cur[1] and cur[0] != "*"):
+        best[ssid] = (inuse, sig, secured)
+for ssid, (inuse, sig, sec) in sorted(best.items(), key=lambda kv: (kv[1][0] != "*", -kv[1][1])):
+    active = 1 if inuse == "*" else 0
+    print("%d\t%d\t%d\t%s" % (active, sig, sec, ssid))
+')
+
+bars() {  # signal % -> icon
+    local s=$1
+    if   (( s >= 80 )); then echo "󰤨"
+    elif (( s >= 60 )); then echo "󰤥"
+    elif (( s >= 40 )); then echo "󰤢"
+    elif (( s >= 20 )); then echo "󰤟"
+    else                     echo "󰤯"; fi
+}
+
+rows=() actions=()
+if [[ -n "$active" ]]; then
+    rows+=("󰖪  Disconnect from $active");  actions+=("disconnect")
+fi
+for n in "${nets[@]}"; do
+    IFS=$'\t' read -r inuse sig sec ssid <<< "$n"
+    label="$(bars "$sig")  $ssid"
+    (( sec ))   && label+="  󰌾"
+    (( inuse )) && label+="  · connected"
+    rows+=("$label"); actions+=("connect:$ssid:$sec:$inuse")
+done
+rows+=("󰑓  Rescan");               actions+=("rescan")
+rows+=("󰖪  Turn Wi-Fi off");       actions+=("radio-off")
+rows+=("󰒓  Network settings");     actions+=("settings")
+
+title="Not connected"
+[[ -n "$active" ]] && title="Connected to $active"
+
+pick="$(printf '%s\n' "${rows[@]}" | menu "$title · pick a network")" || exit 0
+[[ "$pick" =~ ^[0-9]+$ ]] && (( pick < ${#actions[@]} )) || exit 0
+action="${actions[$pick]}"
+
+# --- Act -----------------------------------------------------------------------
+
+case "$action" in
+    disconnect) nmcli connection down id "$active" >/dev/null || fail "Couldn't disconnect from $active." ;;
+    rescan)     nmcli device wifi rescan 2>/dev/null; sleep 2; exec "$SELF" ;;
+    radio-off)  nmcli radio wifi off ;;
+    settings)   settings ;;
+    connect:*)
+        rest="${action#connect:}"; inuse="${rest##*:}"; rest="${rest%:*}"; sec="${rest##*:}"; ssid="${rest%:*}"
+        (( inuse )) && exit 0
+        # Known network: reuse the saved connection (no password needed).
+        for s in "${saved[@]}"; do
+            if [[ "$s" == "$ssid" ]]; then
+                out="$(nmcli connection up id "$ssid" 2>&1)" || fail "Couldn't connect to $ssid: ${out##*Error: }"
+                exit 0
+            fi
+        done
+        if (( sec )); then
+            pw="$(rofi -dmenu -password -p password -theme-str \
+                "entry { placeholder: \"Password for $ssid\"; } listview { enabled: false; }" < /dev/null)" || exit 0
+            [[ -n "$pw" ]] || exit 0
+            out="$(nmcli device wifi connect "$ssid" password "$pw" 2>&1)" || fail "Couldn't connect to $ssid: ${out##*Error: }"
+        else
+            out="$(nmcli device wifi connect "$ssid" 2>&1)" || fail "Couldn't connect to $ssid: ${out##*Error: }"
+        fi
+        ;;
+esac

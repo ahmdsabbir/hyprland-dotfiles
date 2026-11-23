@@ -45,6 +45,9 @@ hl.config({
         blur = {
             enabled = false,
         },
+
+        -- How much to darken behind layers with dim_around (the launcher).
+        dim_around = look.dim_around,
     },
 
     animations = {

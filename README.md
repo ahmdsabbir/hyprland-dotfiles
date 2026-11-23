@@ -16,7 +16,7 @@ My Hyprland setup, built from scratch on top of the stock config.
 | Compositor    | Hyprland      |
 | Terminal      | kitty         |
 | Bar           | Waybar        |
-| Launcher      | hyprlauncher  |
+| Launcher      | rofi          |
 | Lock screen   | hyprlock      |
 | Idle daemon   | hypridle      |
 | File manager  | Nautilus      |
@@ -106,6 +106,8 @@ restores the newest `<file>.bak.*`.
 | `hypr`  | `~/.config/hypr/` |
 | `bin`   | `~/.local/bin/`   |
 | `waybar`| `~/.config/waybar/` |
+| `kitty` | `~/.config/kitty/`  |
+| `rofi`  | `~/.config/rofi/`   |
 
 ## Reloading
 
@@ -120,12 +122,70 @@ Run from a keybind it sends a desktop notification (needs a notification
 daemon). Options: `-q` only print errors, `-n` always notify.
 `install.sh` runs it at the end.
 
+### Bar controls
+
+Workspace pills are shaded by state: the active one is dark and wider,
+workspaces with apps are grey, empty ones are faint.
+
+| Pill    | Shows                  | Click            | Scroll       | Right-click            |
+| ------- | ---------------------- | ---------------- | ------------ | ---------------------- |
+| Volume  | `60% 󰕾`                | mute             | volume ±5%   | mixer (pulsemixer)     |
+| Mic     | `27% 󰍬`                | mute             | mic ±5%      | mixer (pulsemixer)     |
+| Network | Wi-Fi name + signal, or 󰈀 | Wi-Fi menu (`hypr-wifi`) | — | settings (nmtui)   |
+| Internet | `󰖟` online; `limited` / `login` / `offline` otherwise (checked every 30 s, `hypr-internet`) | re-check; opens the login page on captive portals | — | — |
+| CPU / RAM | `15% 󰻠` `64% 󰍛`; pill darkens above 85% / 80% | htop | — | — |
+| Privacy | only while mic / screen share is in use | — | — | — |
+| Tray    | app tray icons (Slack, Solaar, ...); hidden when empty | app menu | — | app menu |
+
+`hypr-wifi` lists nearby networks (strongest first): pick one to connect
+(password asked only for new secured networks; saved ones reconnect), or
+disconnect, rescan, turn Wi-Fi on/off. The mixer and nmtui open in kitty as
+centered floating windows.
+
 ### Power
 
 `hypr-power logout|reboot|shutdown` asks for confirmation (zenity), then acts.
 Clicking Waybar's power icon (far right) opens a dropdown with these three
 actions (`waybar/.config/waybar/power-menu.xml`).
 `--yes` skips the dialog.
+
+## Launcher
+
+rofi (`rofi/.config/rofi/`, theme in `themes/light.rasi`). It runs only while
+open, so it uses no memory in the background.
+
+| Keys              | Opens                                                    |
+| ----------------- | -------------------------------------------------------- |
+| SUPER + R         | apps, most-used first; terminal apps open in kitty       |
+| SUPER + =         | calculator (`hypr-calc`, qalc): Enter calculates, Enter on the result copies it |
+| SUPER + .         | emoji / symbols (rofimoji): Enter copies                 |
+| SUPER + Tab       | window switcher, all workspaces (`hypr-windows`)         |
+| SUPER + SHIFT + V | clipboard history (`hypr-clipboard`, `--clear` wipes it) |
+| SUPER + Escape    | power menu (`hypr-power menu`)                           |
+
+Calculator examples: `2^10`, `15% * 80`, `5 km to mi`, `90 min to h`,
+`100 fahrenheit to celsius`, `50 USD to EUR` (offline exchange rates),
+`now + 3 days`.
+
+## Lock screen and idle
+
+hyprlock (`hyprlock.conf`): flat background, large light clock, date,
+password field (border turns dark while checking, red on a wrong password,
+amber with Caps Lock on). Nothing renders behind it while you're away.
+
+Lock with **SUPER + L**, the Waybar power menu, or SUPER + Escape → Lock.
+
+hypridle (`hypridle.conf`), started with Hyprland:
+
+| After  | Action                               |
+| ------ | ------------------------------------ |
+| 9 min  | dim backlight (laptops only)         |
+| 10 min | lock                                 |
+| 11 min | screens off (back on with any input) |
+
+Apps that inhibit idle (video playback) pause the timer. Suspend is off by
+default (commented out). `misc.allow_session_lock_restore` lets a new
+hyprlock take over if one ever crashes.
 
 ## Hyprland config layout
 
@@ -164,7 +224,9 @@ theme.look.rounding         -- 20
 | `dark`  | _planned_                                                    |
 
 Waybar reads its palette from `waybar/.config/waybar/themes/<name>.css`
-(imported at the top of `style.css`); keep it in sync with the Lua palette.
+(imported at the top of `style.css`), kitty from `kitty/.config/kitty/themes/<name>.conf`
+(included by `kitty.conf`), rofi from `rofi/.config/rofi/themes/<name>.rasi`.
+Keep them in sync with the Lua palette.
 
 Performance choices (in `looks.lua` / `misc.lua`): no blur, opaque windows,
 shadows off (`look.shadow = true` to enable), short animations, plain
@@ -196,9 +258,10 @@ Hyprland --verify-config -c ~/.config/hypr/hyprland.lua
 
 - [x] Hyprland config split into Lua modules
 - [x] Waybar config and style (light)
-- [ ] hyprlock / hypridle config
+- [x] hyprlock / hypridle config (light)
 - [x] Light theme (Hyprland)
-- [ ] Light theme for kitty, hyprlock, hyprlauncher
+- [x] Light theme for kitty
+- [x] Launcher (rofi) with light theme, calculator, emoji, window switcher, clipboard history
 - [ ] Dark theme
 - [x] Install method (GNU Stow + `install.sh`)
 - [x] Per-machine overrides (`hosts/`)

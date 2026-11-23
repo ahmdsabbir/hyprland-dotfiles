@@ -24,12 +24,17 @@ window#waybar {
     padding: 4px 3px;
 }
 
+/* Shaded by state: active = dark + wider, has apps = grey, empty = faint. */
 #workspaces button {
     min-width: 26px;
     padding: 0;
     margin: 0 2px;
     border-radius: 4px;
-    background: @overlay;
+    background: @muted;            /* has apps */
+}
+
+#workspaces button.empty {
+    background: alpha(@overlay, 0.5);
 }
 
 #workspaces button.active {
@@ -37,12 +42,8 @@ window#waybar {
     background: @accent;
 }
 
-#workspaces button.empty {
-    background: alpha(@overlay, 0.6);
-}
-
 #workspaces button:hover {
-    background: @border;
+    background: @subtext;
 }
 
 #workspaces button.urgent {
@@ -52,7 +53,9 @@ window#waybar {
 /* --- Status pills ------------------------------------------------------- */
 
 #pulseaudio,
+#pulseaudio.mic,
 #network,
+#custom-internet,
 #battery,
 #clock {
     background: @surface2;
@@ -61,7 +64,9 @@ window#waybar {
     border-radius: 6px;
 }
 
-#pulseaudio.muted {
+/* Both pulseaudio pills get both classes; scope each to its own pill. */
+#pulseaudio:not(.mic).muted,
+#pulseaudio.mic.source-muted {
     background: @overlay;
     color: @accent;
 }
@@ -70,11 +75,70 @@ window#waybar {
     color: @muted;
 }
 
+#custom-internet.limited,
+#custom-internet.portal,
+#custom-internet.unknown {
+    background: @overlay;
+    color: @text;
+}
+
+#custom-internet.offline {
+    background: @accent;
+    color: @accent_fg;
+}
+
 #battery.warning:not(.charging) {
     color: @text;
 }
 
 #battery.critical:not(.charging) {
+    background: @accent;
+    color: @accent_fg;
+}
+
+/* --- Tray, privacy, resource warnings ------------------------------------ */
+
+#tray {
+    background: @surface2;
+    padding: 0 8px;
+    border-radius: 6px;
+}
+
+/* No tray icons: no empty pill. */
+#tray.empty {
+    background: transparent;
+    padding: 0;
+}
+
+#tray > .needs-attention {
+    background: @overlay;
+    border-radius: 4px;
+}
+
+/* Mic / screen in use: the most prominent pill, on purpose. */
+#privacy {
+    background: @accent;
+    color: @accent_fg;
+    padding: 0 8px;
+    border-radius: 6px;
+}
+
+#cpu,
+#memory {
+    background: @surface2;
+    color: @subtext;
+    padding: 0 10px;
+    border-radius: 6px;
+}
+
+#cpu.warning,
+#memory.warning {
+    background: @overlay;
+    color: @text;
+}
+
+#cpu.critical,
+#memory.critical {
     background: @accent;
     color: @accent_fg;
 }

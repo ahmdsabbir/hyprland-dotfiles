@@ -12,9 +12,10 @@
 
     "modules-left": ["hyprland/workspaces"],
     "modules-center": [],
-    "modules-right": ["pulseaudio", "network", "battery", "clock", "custom/power"],
+    "modules-right": ["privacy", "cpu", "memory", "tray", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/power"],
 
-    // Workspaces as plain pills (no labels); the active one is wider and darker.
+    // Workspaces as plain pills, shaded by state (see style.css):
+    // active = dark and wider, has apps = grey, empty = faint.
     "hyprland/workspaces": {
         "format": "",
         "persistent-workspaces": { "*": 5 },
@@ -23,23 +24,95 @@
         "on-scroll-down": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'"
     },
 
+    // Privacy: appears only while the mic or screen sharing is in use.
+    "privacy": {
+        "icon-size": 14,
+        "icon-spacing": 6,
+        "transition-duration": 200,
+        "modules": [
+            { "type": "screenshare", "tooltip": true, "tooltip-icon-size": 20 },
+            { "type": "audio-in",    "tooltip": true, "tooltip-icon-size": 20 }
+        ]
+    },
+
+    // CPU / RAM: always shown; the pill darkens when usage is high.
+    // Reading /proc every few seconds costs microseconds; no extra process.
+    "cpu": {
+        "interval": 5,
+        "format": "{usage}% 󰻠",
+        "format-warning": "{usage}% 󰻠",
+        "format-critical": "{usage}% 󰻠",
+        "states": { "warning": 85, "critical": 95 },
+        "tooltip-format": "CPU {usage}% · load {load} · click: htop",
+        "on-click": "kitty --class hypr-top -e htop"
+    },
+    "memory": {
+        "interval": 15,
+        "format": "{percentage}% 󰍛",
+        "format-warning": "{percentage}% 󰍛",
+        "format-critical": "{percentage}% 󰍛",
+        "states": { "warning": 80, "critical": 92 },
+        "tooltip-format": "RAM {used:0.1f} / {total:0.1f} GiB · swap {swapUsed:0.1f} GiB · click: htop",
+        "on-click": "kitty --class hypr-top -e htop"
+    },
+
+    // Tray icons from apps (Slack, Solaar, Remmina...). Hidden when empty.
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8,
+        "show-passive-items": true
+    },
+
+    // Speakers: scroll = volume, click = mute, right-click = mixer.
     "pulseaudio": {
         "format": "{volume}% {icon}",
         "format-muted": "󰝟",
         "format-icons": { "default": ["󰕿", "󰖀", "󰕾"] },
         "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-        "scroll-step": 5,
-        "tooltip-format": "{desc}"
+        "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
+        "on-click-right": "kitty --class hypr-mixer -e pulsemixer",
+        "tooltip-format": "{desc} · scroll: volume · click: mute · right-click: mixer"
     },
 
+    // Microphone: same controls, for the default input.
+    "pulseaudio#mic": {
+        "format": "{format_source}",
+        "format-source": "{volume}% 󰍬",
+        "format-source-muted": "󰍭",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+        "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SOURCE@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-",
+        "on-click-right": "kitty --class hypr-mixer -e pulsemixer",
+        "tooltip-format": "{source_desc} · scroll: volume · click: mute · right-click: mixer"
+    },
+
+    // Network: Wi-Fi name + signal. Click = Wi-Fi menu (connect/disconnect),
+    // right-click = full network settings (nmtui).
     "network": {
         "interval": 30,
-        "format-wifi": "{signalStrength}% 󰖩",
+        "format-wifi": "{essid} {icon}",
+        "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
         "format-ethernet": "󰈀",
         "format-disconnected": "󰖪",
-        "tooltip-format-wifi": "{essid} · {ipaddr}",
-        "tooltip-format-ethernet": "{ifname} · {ipaddr}",
-        "tooltip-format-disconnected": "Disconnected"
+        "max-length": 28,
+        "tooltip-format-wifi": "{essid} · {signalStrength}% · {ipaddr}\nclick: Wi-Fi menu · right-click: settings",
+        "tooltip-format-ethernet": "{ifname} · {ipaddr}\nclick: Wi-Fi menu · right-click: settings",
+        "tooltip-format-disconnected": "Disconnected\nclick: Wi-Fi menu · right-click: settings",
+        "on-click": "$HOME/.local/bin/hypr-wifi",
+        "on-click-right": "kitty --class hypr-nmtui -e nmtui"
+    },
+
+    // Internet reachability (not just the link): NetworkManager's check,
+    // refreshed every 30 s. Click: re-check (opens the login page on a
+    // captive portal). Refresh from scripts: pkill -RTMIN+8 waybar
+    "custom/internet": {
+        "exec": "$HOME/.local/bin/hypr-internet",
+        "return-type": "json",
+        "interval": 30,
+        "signal": 8,
+        "on-click": "$HOME/.local/bin/hypr-internet --open",
+        "exec-on-event": true
     },
 
     // Hidden automatically on machines without a battery.
@@ -60,13 +133,14 @@
     },
 
     // Power: click for a dropdown menu (power-menu.xml).
-    // Each action asks for confirmation (bin/.local/bin/hypr-power).
+    // Log out / restart / shut down ask for confirmation (bin/.local/bin/hypr-power).
     "custom/power": {
         "format": "󰐥",
         "tooltip": false,
         "menu": "on-click",
         "menu-file": "$HOME/.config/waybar/power-menu.xml",
         "menu-actions": {
+            "lock": "$HOME/.local/bin/hypr-power lock",
             "logout": "$HOME/.local/bin/hypr-power logout",
             "reboot": "$HOME/.local/bin/hypr-power reboot",
             "shutdown": "$HOME/.local/bin/hypr-power shutdown"

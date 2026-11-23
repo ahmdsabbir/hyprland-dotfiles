@@ -25,6 +25,9 @@ return {
         border_size = 2,
         rounding    = 6,
 
+        -- Darken behind the launcher (0 = off, 1 = black). Light: keep it gentle.
+        dim_around = 0.15,
+
         -- Off by default to keep it light on the GPU.
         -- The reference uses a soft offset shadow; set true to get that look.
         shadow = false,
