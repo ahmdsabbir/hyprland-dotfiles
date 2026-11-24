@@ -4,7 +4,8 @@ local programs = require("modules.programs")
 local mainMod  = programs.mainMod
 
 -- Apps and window actions
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(programs.terminal))
+hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(programs.terminal))   -- terminal
+hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-dropdown")) -- drop-down terminal
 local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))

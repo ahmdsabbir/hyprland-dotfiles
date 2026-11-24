@@ -73,6 +73,18 @@ hl.window_rule({
     center = true,
 })
 
+-- Drop-down terminal (SUPER+SHIFT+Enter, hypr-dropdown): floating, top-center below the
+-- bar, on the hidden special workspace "dropdown" until toggled in.
+hl.window_rule({
+    name  = "dropdown-terminal",
+    match = { class = "^hypr-dropdown$" },
+
+    float     = true,
+    size      = "monitor_w*0.8 monitor_h*0.5",
+    move      = "monitor_w*0.1 44",
+    workspace = "special:dropdown silent",
+})
+
 -- Screenshot annotation editor
 hl.window_rule({
     name  = "float-swappy",

@@ -35,7 +35,8 @@ theme that switch everything at once.
 | --- | --- |
 | **Apps** | |
 | SUPER + SPACE | app launcher |
-| SUPER + Q | terminal (kitty) |
+| SUPER + Enter | terminal (kitty) |
+| SUPER + SHIFT + Enter | drop-down terminal (toggle; keeps its session) |
 | SUPER + E | file manager (Nautilus) |
 | SUPER + = | calculator |
 | SUPER + . | emoji / symbols |
@@ -346,6 +347,7 @@ Each top-level folder is a Stow package that mirrors `$HOME`:
 | `hypr-wifi` | Wi-Fi menu |
 | `hypr-internet` | internet status for Waybar |
 | `hypr-notify` | notification controls (do-not-disturb, dismiss, restore) |
+| `hypr-dropdown` | drop-down terminal toggle |
 
 ### Hyprland config
 

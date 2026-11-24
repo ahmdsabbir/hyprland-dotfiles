@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Drop-down terminal (SUPER+SHIFT+Enter): a kitty that slides in over the current screen
+# and hides again, keeping its session between uses.
+#
+# Usage: hypr-dropdown
+#
+# First press starts it (window class "hypr-dropdown"; rules in rules.lua put
+# it, floating, on the hidden special workspace "dropdown"); every press then
+# shows / hides that workspace.
+
+set -uo pipefail
+
+CLASS="hypr-dropdown"
+toggle() { hyprctl dispatch 'hl.dsp.workspace.toggle_special("dropdown")' >/dev/null; }
+
+running() {
+    hyprctl clients -j | python3 -c "
+import json, sys
+sys.exit(0 if any(c.get('class') == '$CLASS' for c in json.load(sys.stdin)) else 1)"
+}
+
+if ! running; then
+    setsid -f kitty --class "$CLASS" >/dev/null 2>&1
+    # Wait (up to ~3 s) for it to appear on its hidden workspace, then show it.
+    for _ in $(seq 30); do
+        running && break
+        sleep 0.1
+    done
+fi
+
+toggle

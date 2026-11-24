@@ -74,3 +74,5 @@ hl.animation({ leaf = "fade",       enabled = true, speed = 2,   bezier = "quick
 hl.animation({ leaf = "border",     enabled = true, speed = 3,   bezier = "linear" })
 hl.animation({ leaf = "layers",     enabled = true, speed = 2,   bezier = "easeOutQuint", style = "fade" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 2,   bezier = "easeOutQuint", style = "fade" })
+-- Special workspaces (scratchpad, drop-down terminal) slide in from the top.
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.5, bezier = "easeOutQuint", style = "slidevert" })
