@@ -41,9 +41,16 @@ hl.config({
             color        = theme.rgba("shadow", 0.6),
         },
 
-        -- Blur is the most expensive effect; keep it off.
+        -- Blur: enabled for the launcher's backdrop only (layer rule in
+        -- rules.lua); every window opts out (no-blur-windows rule), so it costs
+        -- nothing until rofi opens. Light settings for an integrated GPU.
         blur = {
-            enabled = false,
+            enabled           = true,
+            size              = look.blur_size,
+            passes            = look.blur_passes,
+            new_optimizations = true,
+            xray              = false,
+            popups            = false,
         },
 
         -- How much to darken behind layers with dim_around (the launcher).

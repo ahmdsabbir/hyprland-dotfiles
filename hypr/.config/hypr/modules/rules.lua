@@ -25,14 +25,24 @@ hl.window_rule({
     no_focus = true,
 })
 
--- Launcher: dim everything behind it so it reads as a focused pop-up
--- (a cheap stand-in for the reference's blurred backdrop).
--- Strength: decoration.dim_around, set from the theme in looks.lua.
+-- Blur is only for short-lived pop-ups, never windows: a window that is
+-- partly transparent (menus, some apps) would cost GPU on every redraw.
+hl.window_rule({
+    name  = "no-blur-windows",
+    match = { class = ".*" },
+
+    no_blur = true,
+})
+
+-- Launcher: frosted backdrop. Rofi draws a full-screen, slightly tinted
+-- transparent window (rofi/themes/light.rasi); Hyprland blurs what's behind it.
+-- Costs GPU only while rofi is open, and the screen behind it is static.
 hl.layer_rule({
-    name  = "dim-behind-launcher",
+    name  = "blur-behind-launcher",
     match = { namespace = "^rofi$" },
 
-    dim_around = true,
+    blur         = true,
+    ignore_alpha = 0, -- blur behind every pixel, including the faint tint
 })
 
 -- Pop-up tools opened from Waybar (right-click volume / network): float, centered.

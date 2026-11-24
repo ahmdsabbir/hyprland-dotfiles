@@ -18,22 +18,45 @@
     text-color:       @text;
 }
 
-/* --- Panel ---------------------------------------------------------------- */
+/* --- Backdrop + panel --------------------------------------------------------
+ * The window covers the whole screen with a faint tint; Hyprland blurs what's
+ * behind it (layer rule "blur-behind-launcher"). The panel (mainbox, 764px)
+ * is centered by expanding spacers on all four sides.
+ */
 
 window {
-    location:         center;
-    anchor:           center;
+    fullscreen:       true;
+    padding:          0;
+    border:           0;
+    background-color: rgba(217, 217, 217, 0.15);   /* @base, 15%: light frosted tint */
+    children:         [ backdrop ];
+}
+
+backdrop {
+    orientation: vertical;
+    children:    [ spacer-top, row, spacer-bottom ];
+}
+
+spacer-top, spacer-bottom, spacer-left, spacer-right {
+    expand: true;
+}
+
+row {
+    orientation: horizontal;
+    expand:      false;
+    children:    [ spacer-left, mainbox, spacer-right ];
+}
+
+mainbox {
+    expand:           false;
     width:            764px;
     padding:          28px;
+    spacing:          16px;
     border:           2px solid;
     border-color:     @accent;
     border-radius:    8px;
     background-color: @surface;
-}
-
-mainbox {
-    spacing:  16px;
-    children: [ inputbar, message, listview ];
+    children:         [ inputbar, message, listview ];
 }
 
 /* --- Search box: "Type to filter" ... "/" ---------------------------------- */
@@ -53,7 +76,7 @@ entry {
 
 textbox-slash {
     expand:     false;
-    str:        "/";
+    content:    "/";
     text-color: @muted;
 }
 

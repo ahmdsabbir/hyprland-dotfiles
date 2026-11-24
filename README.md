@@ -108,6 +108,7 @@ restores the newest `<file>.bak.*`.
 | `waybar`| `~/.config/waybar/` |
 | `kitty` | `~/.config/kitty/`  |
 | `rofi`  | `~/.config/rofi/`   |
+| `zsh`   | `~/.oh-my-zsh/custom/themes/` (prompt theme; needs zsh + oh-my-zsh) |
 
 ## Reloading
 
@@ -186,6 +187,32 @@ hypridle (`hypridle.conf`), started with Hyprland:
 Apps that inhibit idle (video playback) pause the timer. Suspend is off by
 default (commented out). `misc.allow_session_lock_restore` lets a new
 hyprlock take over if one ever crashes.
+
+## Shell prompt
+
+`zsh/.oh-my-zsh/custom/themes/yonko.zsh-theme`, selected by `ZSH_THEME="yonko"`
+in `~/.zshrc` (not managed here). Minimal and adaptive: one line normally, two
+lines inside a git repo so branch info never crowds what you type.
+
+```
+~ ❯
+~/Downloads ❯
+
+hyprland-dotfiles on ⎇ main ⇡1 !1 ?1
+❯
+
+hyprland-dotfiles/hypr on ⎇ main !1
+✗ 1 ❯                                         took 12s
+```
+
+Ink + one green accent, using only the terminal's 16 theme colors (follows the
+kitty theme): bold folder, green branch and success arrow, faint details, red
+for a failed command / conflicts, yellow while rebasing or merging.
+Git: `⇡`/`⇣` ahead/behind, `+` staged, `!` modified, `?` untracked,
+`=` conflicts, `≡` stashes. Also when relevant: `via 󰌠 venv`, background jobs
+`✦1`, `user@host` over SSH, `root`. `took Ns` for commands over 2 s.
+
+Needs zsh and oh-my-zsh on the machine (not installed by `install.sh`).
 
 ## Hyprland config layout
 

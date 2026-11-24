@@ -25,8 +25,13 @@ return {
         border_size = 2,
         rounding    = 6,
 
-        -- Darken behind the launcher (0 = off, 1 = black). Light: keep it gentle.
+        -- Darken behind layers with dim_around (0 = off, 1 = black).
+        -- Not used by the launcher anymore (it blurs instead); kept for others.
         dim_around = 0.15,
+
+        -- Launcher backdrop blur: radius and passes (more = softer, more GPU).
+        blur_size   = 2,
+        blur_passes = 1,
 
         -- Off by default to keep it light on the GPU.
         -- The reference uses a soft offset shadow; set true to get that look.
