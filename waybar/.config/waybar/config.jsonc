@@ -12,7 +12,7 @@
 
     "modules-left": ["hyprland/workspaces", "tray"],
     "modules-center": [],
-    "modules-right": ["privacy", "group/resources", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/clipboard", "custom/notifications", "custom/power"],
+    "modules-right": ["privacy", "group/resources", "mpris", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/clipboard", "custom/notifications", "custom/power"],
 
     // Workspaces as plain pills, shaded by state (see style.css):
     // active = dark and wider, has apps = grey, empty = faint.
@@ -23,6 +23,17 @@
         // Hyprland's Lua config uses hl.dsp.* dispatchers.
         "on-scroll-up": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e-1\" })'",
         "on-scroll-down": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'"
+    },
+
+    // Media playing in the browser / any player (MPRIS). Hidden when nothing
+    // plays. click: play/pause · right-click: next · middle-click: previous.
+    "mpris": {
+        // Icon only; hover for the title.
+        "format": "{status_icon}",
+        "format-paused": "{status_icon}",
+        "format-stopped": "",
+        "status-icons": { "playing": "󰏤", "paused": "󰐊", "stopped": "󰓛" },
+        "tooltip-format": "{player}: {title}\n{artist}\nclick: play/pause · right-click: next · middle-click: previous"
     },
 
     // Privacy: appears only while the mic or screen sharing is in use.

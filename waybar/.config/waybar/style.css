@@ -97,6 +97,19 @@ window#waybar {
     color: @accent_fg;
 }
 
+/* --- Media (right, next to volume) ---------------------------------------- */
+
+#mpris {
+    background: @surface2;
+    color: @text;
+    padding: 0 12px;
+    border-radius: 6px;
+}
+
+#mpris.paused {
+    color: @subtext;
+}
+
 /* --- Tray, privacy, resource warnings ------------------------------------ */
 
 #tray {

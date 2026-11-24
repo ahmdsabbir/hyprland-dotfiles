@@ -171,6 +171,7 @@ rarely; no custom scripts run in the background.
 | --- | --- | --- | --- | --- |
 | Privacy | only while the mic or screen sharing is in use | — | — | — |
 | CPU / RAM | `20% 󰻠  32% 󰍛` in one pill; a value's half darkens above 85% / 80% | htop | — | — |
+| Media | `󰏤` / `󰐊` while something plays (hover: title); hidden otherwise | play / pause | — | next (middle-click: previous) |
 | Volume | `60% 󰕾` | mute | ±5% | mixer (pulsemixer) |
 | Mic | `27% 󰍬` | mute | ±5% | mixer (pulsemixer) |
 | Network | Wi-Fi name + signal, or 󰈀 on Ethernet | Wi-Fi menu | — | network settings (nmtui) |
