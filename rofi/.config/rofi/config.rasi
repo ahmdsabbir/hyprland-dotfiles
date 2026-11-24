@@ -1,6 +1,6 @@
 /* rofi: app launcher and menus. Runs only while open (no daemon).
  * Docs: man rofi, man rofi-theme
- * Used by: SUPER+R (apps), hypr-calc, hypr-windows, hypr-clipboard,
+ * Used by: SUPER+SPACE (apps), hypr-calc, hypr-windows, hypr-clipboard,
  *          hypr-power menu, rofimoji. */
 
 configuration {

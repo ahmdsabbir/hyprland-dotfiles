@@ -10,7 +10,7 @@ local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(programs.fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(programs.menu))
+hl.bind(mainMod .. " + space", hl.dsp.exec_cmd(programs.menu))   -- app launcher
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
@@ -20,7 +20,7 @@ hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-reload
 -- Theme: light <-> dark (hypr-theme)
 hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-theme toggle"))
 
--- Menus (rofi). SUPER+R above opens the app launcher.
+-- Menus (rofi). SUPER+SPACE above opens the app launcher.
 hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd("rofimoji --action copy --skin-tone neutral")) -- emoji / symbols
 hl.bind(mainMod .. " + equal",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-calc"))          -- calculator
 hl.bind(mainMod .. " + Tab",        hl.dsp.exec_cmd("$HOME/.local/bin/hypr-windows"))       -- window switcher
@@ -61,6 +61,13 @@ end
 -- Special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + ALT + S",   hl.dsp.window.move({ workspace = "special:magic" }))   -- SHIFT+S is the area screenshot
+
+-- Previous / next workspace on the current monitor (wraps around)
+hl.bind("CTRL + ALT + left",  hl.dsp.focus({ workspace = "m-1" }))
+hl.bind("CTRL + ALT + right", hl.dsp.focus({ workspace = "m+1" }))
+-- ...and carry the focused window along
+hl.bind("CTRL + ALT + SHIFT + left",  hl.dsp.window.move({ workspace = "m-1" }))
+hl.bind("CTRL + ALT + SHIFT + right", hl.dsp.window.move({ workspace = "m+1" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
