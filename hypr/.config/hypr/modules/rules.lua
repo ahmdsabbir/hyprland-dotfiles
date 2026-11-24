@@ -35,7 +35,7 @@ hl.window_rule({
 })
 
 -- Launcher: frosted backdrop. Rofi draws a full-screen, slightly tinted
--- transparent window (rofi/themes/light.rasi); Hyprland blurs what's behind it.
+-- transparent window (rofi/layout.rasi); Hyprland blurs what's behind it.
 -- Costs GPU only while rofi is open, and the screen behind it is static.
 hl.layer_rule({
     name  = "blur-behind-launcher",
@@ -70,6 +70,15 @@ hl.window_rule({
 
     float  = true,
     size   = "1000 640",
+    center = true,
+})
+
+-- Screenshot annotation editor
+hl.window_rule({
+    name  = "float-swappy",
+    match = { class = "^swappy$" },
+
+    float  = true,
     center = true,
 })
 

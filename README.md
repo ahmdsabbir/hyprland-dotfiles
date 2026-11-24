@@ -128,6 +128,10 @@ daemon). Options: `-q` only print errors, `-n` always notify.
 
 Workspace pills are shaded by state: the active one is dark and wider,
 workspaces with apps are grey, empty ones are faint.
+Workspaces are assigned automatically (`modules/workspaces.lua`): 3 per
+connected monitor, numbered left to right (one monitor: 1-3; two: 1-3 | 4-6;
+three: 1-3 | 4-6 | 7-9). Plugging a monitor in or out re-assigns them. Each bar
+shows its own monitor's three.
 
 | Pill    | Shows                  | Click            | Scroll       | Right-click            |
 | ------- | ---------------------- | ---------------- | ------------ | ---------------------- |
@@ -138,6 +142,7 @@ workspaces with apps are grey, empty ones are faint.
 | CPU / RAM | `15% 󰻠` `64% 󰍛`; pill darkens above 85% / 80% | htop | — | — |
 | Privacy | only while mic / screen share is in use | — | — | — |
 | Tray    | app tray icons (Slack, Solaar, ...); hidden when empty | app menu | — | app menu |
+| Clipboard | `󰅌` | clipboard history (Enter copies, Shift+Delete removes) | — | — |
 
 `hypr-wifi` lists nearby networks (strongest first): pick one to connect
 (password asked only for new secured networks; saved ones reconnect), or
@@ -153,7 +158,7 @@ actions (`waybar/.config/waybar/power-menu.xml`).
 
 ## Launcher
 
-rofi (`rofi/.config/rofi/`, theme in `themes/light.rasi`). It runs only while
+rofi (`rofi/.config/rofi/`, layout in `layout.rasi`, colors from the theme). It runs only while
 open, so it uses no memory in the background.
 
 | Keys              | Opens                                                    |
@@ -162,7 +167,7 @@ open, so it uses no memory in the background.
 | SUPER + =         | calculator (`hypr-calc`, qalc): Enter calculates, Enter on the result copies it |
 | SUPER + .         | emoji / symbols (rofimoji): Enter copies                 |
 | SUPER + Tab       | window switcher, all workspaces (`hypr-windows`)         |
-| SUPER + SHIFT + V | clipboard history (`hypr-clipboard`, `--clear` wipes it) |
+| SUPER + SHIFT + V | clipboard history (`hypr-clipboard`): Enter copies, Shift+Delete removes, `--clear` wipes it |
 | SUPER + Escape    | power menu (`hypr-power menu`)                           |
 
 Calculator examples: `2^10`, `15% * 80`, `5 km to mi`, `90 min to h`,
@@ -186,6 +191,32 @@ Repeats from the same app/title are grouped with a count; at most 4 visible.
 
 Do-not-disturb hides everything except critical notifications. History keeps
 the last 20. Try it: `notify-send "Hello" "This is a test"`.
+
+## GTK apps
+
+- **Color scheme:** each palette's `color_scheme` is applied by `hypr-theme`
+  (and at login). GTK/libadwaita apps switch instantly; browsers and Electron
+  apps set to follow the system do too. The GNOME session shares this setting.
+- **libadwaita colors** (Nautilus, zenity, GNOME apps): generated
+  `~/.config/gtk-4.0/gtk.css` holds both themes, each inside
+  `@media (prefers-color-scheme: …)`, so open apps follow a switch.
+- **GTK 3 apps** use stock Adwaita (light or dark).
+
+## Screenshots
+
+`hypr-screenshot` saves to `~/Pictures/Screenshots` **and** copies to the
+clipboard. A notification shows a thumbnail: click it to annotate (swappy:
+arrows, boxes, text, blur), or choose "Open".
+
+| Keys              | Captures                                             |
+| ----------------- | ---------------------------------------------------- |
+| SUPER + SHIFT + S or Print | an area: drag to select (screen frozen meanwhile, Esc cancels) |
+| SHIFT + Print     | the current monitor                                  |
+| CTRL + Print      | the active window                                    |
+| SUPER + Print     | menu: area / window / screen / all, plus 3 s and 5 s delays |
+| SUPER + SHIFT + C | color picker: click a pixel, its hex code is copied  |
+
+Also from a terminal: `hypr-screenshot area|screen|window|all [--delay N]`.
 
 ## Lock screen and idle
 
@@ -245,38 +276,58 @@ Needs zsh and oh-my-zsh on the machine (not installed by `install.sh`).
 | `autostart.lua`| apps started with Hyprland                       |
 | `looks.lua`    | gaps, borders, decoration, animations            |
 | `layouts.lua`  | dwindle / master / scrolling                     |
+| `workspaces.lua` | 3 workspaces per monitor, left to right        |
 | `misc.lua`     | misc, layers, permissions                        |
 | `input.lua`    | keyboard, mouse, touchpad, gestures              |
 | `keybinds.lua` | key and mouse bindings                           |
 | `rules.lua`    | window and layer rules                           |
-| `theme.lua`    | picks the active theme from `themes/`            |
+| `theme.lua`    | active theme: palette + look (see Themes)        |
 | `host.lua`     | loads `hosts/<hostname>.lua` (last)              |
 
 ### Themes
 
-`themes/<name>.lua` holds a palette (`colors`) and shape settings (`look`).
-`modules/theme.lua` selects one (`NAME = "light"`), and other modules read it:
+Two themes, **light** and **dark**, switched as a whole:
 
-```lua
-local theme = require("modules.theme")
-theme.rgb("border")         -- "rgb(7a7a7a)"
-theme.rgba("shadow", 0.6)   -- "rgba(8f8f8f99)"
-theme.look.rounding         -- 20
+```sh
+hypr-theme toggle      # or SUPER + SHIFT + T
+hypr-theme dark        # / light
+hypr-theme             # current theme
+hypr-theme apply       # re-generate after editing a palette or template
 ```
 
-| Theme   | Style                                                        |
-| ------- | ------------------------------------------------------------ |
-| `light` | monotone greys on paper (inspired by "hyprink monotone")     |
-| `dark`  | _planned_                                                    |
+One palette per theme is the single source of truth:
 
-Waybar reads its palette from `waybar/.config/waybar/themes/<name>.css`
-(imported at the top of `style.css`), kitty from `kitty/.config/kitty/themes/<name>.conf`
-(included by `kitty.conf`), rofi from `rofi/.config/rofi/themes/<name>.rasi`.
-Keep them in sync with the Lua palette.
+| File | What |
+| --- | --- |
+| `themes/<name>.colors` | **the palette**: UI colors, status inks, 16 terminal colors, GTK color scheme |
+| `themes/<name>.lua` | look: gaps, rounding, blur, dim |
+| `themes/templates/*` | per-app color files with `{{key}}` slots |
+| `themes/light.kitty-extra` | light-only 256-color fixes for kitty |
 
-Performance choices (in `looks.lua` / `misc.lua`): no blur, opaque windows,
-shadows off (`look.shadow = true` to enable), short animations, plain
-background colour instead of a wallpaper.
+Hyprland reads the palette directly (`modules/theme.lua`). For everything else
+`hypr-theme` renders the templates into the apps' config folders (outside the
+repo), which their configs include:
+
+| App | Generated file | Included by |
+| --- | --- | --- |
+| kitty | `~/.config/kitty/theme.conf` | `kitty.conf` |
+| Waybar | `~/.config/waybar/theme.css` | `style.css` |
+| rofi | `~/.config/rofi/theme.rasi` | `layout.rasi` |
+| hyprlock | `~/.config/hypr/hyprlock-theme.conf` | `hyprlock.conf` |
+| mako | `~/.config/mako/theme` | `config` (last line) |
+| GTK 4 | `~/.config/gtk-4.0/gtk.css` | GTK (both themes, by color scheme) |
+
+Switching writes the choice to `~/.local/state/hyprland-dotfiles/theme`, sets
+the GTK color scheme, and reloads Hyprland, Waybar, kitty and mako live; rofi
+and hyprlock pick it up next time they open; the zsh prompt follows kitty.
+Rendering is all-or-nothing: a bad template changes nothing. `install.sh`
+generates the files; `uninstall.sh` removes them.
+
+To add a theme: copy `light.colors` / `light.lua` to `<name>.*`, edit, then
+`hypr-theme <name>`.
+
+Performance choices (in `looks.lua` / `misc.lua`): no blur on windows, opaque
+windows, shadows off, short animations, plain background color.
 
 ### Per-machine settings
 
@@ -308,6 +359,7 @@ Hyprland --verify-config -c ~/.config/hypr/hyprland.lua
 - [x] Light theme (Hyprland)
 - [x] Light theme for kitty
 - [x] Launcher (rofi) with light theme, calculator, emoji, window switcher, clipboard history
-- [ ] Dark theme
+- [x] GTK apps
+- [x] Dark theme + theme switcher (`hypr-theme`)
 - [x] Install method (GNU Stow + `install.sh`)
 - [x] Per-machine overrides (`hosts/`)

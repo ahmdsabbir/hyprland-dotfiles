@@ -234,6 +234,42 @@ make_parent_dirs() {
     done < <(find "$REPO/$pkg" -mindepth 1 -maxdepth 2 -type d -print0)
 }
 
+# Remove dangling symlinks that point into this repo (files deleted or moved
+# in the repo since the last install), so they don't linger in $HOME.
+prune_stale_links() {
+    local repo_real link target
+    repo_real="$(cd "$REPO" && pwd -P)"
+    while IFS= read -r -d '' link; do
+        target="$(readlink -m "$link")"
+        [[ "$target" == "$repo_real/"* ]] || continue
+        log "Removing stale link ${link/#$HOME/\~}"
+        run rm "$link"
+    done < <(find "$HOME/.config" -maxdepth 3 -xtype l -print0 2>/dev/null
+             find "$HOME/.local/bin" -maxdepth 1 -xtype l -print0 2>/dev/null
+             find "$HOME/.oh-my-zsh/custom" -maxdepth 2 -xtype l -print0 2>/dev/null)
+}
+
+# Render the active theme's colors for kitty, Waybar, rofi, hyprlock, mako and
+# GTK (files the linked configs include). Uses the repo copy of the themes, so
+# it works on the first install too.
+generate_theme() {
+    local theme="$REPO/bin/.local/bin/hypr-theme"
+    [[ -x "$theme" && -d "$REPO/hypr/.config/hypr/themes" ]] || return 0
+    # GTK reads its colors from ~/.config/gtk-4.0/gtk.css; no package creates
+    # that folder, so make it (recorded, so uninstall removes it again).
+    local gtk_dir="$HOME/.config/gtk-4.0"
+    if [[ ! -d "$gtk_dir" ]]; then
+        run mkdir -p "$gtk_dir"
+        record mkdir "$gtk_dir"
+    fi
+    if (( DRY_RUN )); then
+        printf '   [dry-run] hypr-theme apply --no-reload (generate theme colors)\n'
+        return 0
+    fi
+    HYPR_THEMES_DIR="$REPO/hypr/.config/hypr/themes" "$theme" apply --no-reload \
+        && log "Theme: $("$theme")" || warn "Generating theme colors failed (run: hypr-theme apply)"
+}
+
 link_dotfiles() {
     local have_stow=1
     command -v stow >/dev/null || have_stow=0
@@ -246,6 +282,8 @@ link_dotfiles() {
             STOW_PACKAGES+=("$(basename "$d")")
         done
     fi
+
+    prune_stale_links
 
     local pkg
     for pkg in "${STOW_PACKAGES[@]}"; do
@@ -291,5 +329,6 @@ reload_hyprland() {
 choose_distro
 install_packages
 link_dotfiles
+generate_theme
 (( DRY_RUN )) || reload_hyprland
 log "Done."

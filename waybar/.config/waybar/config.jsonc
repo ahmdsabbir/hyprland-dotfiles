@@ -12,13 +12,14 @@
 
     "modules-left": ["hyprland/workspaces"],
     "modules-center": [],
-    "modules-right": ["privacy", "cpu", "memory", "tray", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/notifications", "custom/power"],
+    "modules-right": ["privacy", "cpu", "memory", "tray", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/clipboard", "custom/notifications", "custom/power"],
 
     // Workspaces as plain pills, shaded by state (see style.css):
     // active = dark and wider, has apps = grey, empty = faint.
+    // Which workspaces appear comes from Hyprland's workspace rules
+    // (modules/layouts.lua, hosts/<hostname>.lua), per monitor.
     "hyprland/workspaces": {
         "format": "",
-        "persistent-workspaces": { "*": 5 },
         // Hyprland's Lua config uses hl.dsp.* dispatchers.
         "on-scroll-up": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e-1\" })'",
         "on-scroll-down": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'"
@@ -130,6 +131,15 @@
         "format": "{:%d/%m %H:%M}",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": { "mode": "month", "weeks-pos": "" }
+    },
+
+    // Clipboard history (cliphist): click to open it in rofi.
+    // Static icon: nothing runs until you click.
+    "custom/clipboard": {
+        "format": "󰅌",
+        "tooltip": true,
+        "tooltip-format": "Clipboard history · click to open (SUPER+SHIFT+V)\nIn the list: Enter copies · Shift+Delete removes",
+        "on-click": "$HOME/.local/bin/hypr-clipboard"
     },
 
     // Notifications (mako): bell, or a crossed bell in do-not-disturb.

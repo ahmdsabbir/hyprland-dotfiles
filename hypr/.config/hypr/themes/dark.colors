@@ -1,0 +1,54 @@
+# Dark: Nord "Polar Night" blue-greys, soft contrast.
+# Base shades from coolors.co/palette/2e3440-3b4252-434c5e-4c566a;
+# text and accents are soft blue-grey tints of the same family, status and
+# terminal colors are Nord's "Aurora" hues (red and magenta lifted slightly so
+# they stay readable on 2e3440).
+# THE palette for this theme: Hyprland reads it directly; hypr-theme renders
+# themes/templates/* from it for kitty, Waybar, rofi, hyprlock, mako and GTK.
+# Format: key = value (hex without "#"). Run `hypr-theme apply` after editing.
+
+color_scheme = prefer-dark    # GTK / browsers / Electron
+
+# --- UI (palette shades) ---------------------------------------------------
+base      = 3b4252   # desktop background (a step lighter than windows)
+surface   = 2e3440   # windows, panels, terminal background
+surface2  = 434c5e   # bar pills, header bars, sidebars
+raised    = 3b4252   # cards, popovers
+overlay   = 4c566a   # inactive pills / borders
+
+# --- Tints of the same blue-grey -------------------------------------------
+border    = 7b88a1   # active window border
+frame     = 5e6a80   # panel borders (launcher, notifications)
+muted     = 6e7a90   # placeholders, faint hints
+subtext   = b3bccc   # secondary text        (6.5:1; 4.5:1 on pills)
+text      = c5ccd8   # primary text          (7.7:1, soft)
+accent    = 9aa5bb   # selection, active workspace
+accent_fg = 2e3440   # text on accent        (5.0:1)
+sel_bg    = 4c566a   # text selection (terminal)
+sel_fg    = c5ccd8
+shadow    = 000000
+
+# --- Status (Nord Aurora, all >= 4.5:1 on surface) -------------------------
+green     = a3be8c
+red       = d08c93
+yellow    = ebcb8b
+blue      = 81a1c1
+on_status = 2e3440   # text on a status-colored background
+
+# --- Terminal ANSI colors (kitty; the zsh prompt uses these) ---------------
+c0  = 4c566a
+c1  = d08c93
+c2  = a3be8c
+c3  = ebcb8b
+c4  = 81a1c1
+c5  = bf9bb8
+c6  = 88c0d0
+c7  = b0b8c6
+c8  = 6e7a90   # bright black: deliberately faint (hints, autosuggestions)
+c9  = d4949b
+c10 = b4cba0
+c11 = f0d7a1
+c12 = 94b1cf
+c13 = c3a2bd
+c14 = 9bcbd9
+c15 = d8dee9

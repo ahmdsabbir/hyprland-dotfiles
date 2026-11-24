@@ -14,6 +14,12 @@ waybar
 nautilus
 # Audio mixer (Waybar right-click on volume/mic), opens in kitty
 pulsemixer
+# Screenshots (grim/slurp), screen freeze + color picker (hyprpicker), annotation (swappy)
+grim
+slurp
+hyprpicker
+swappy
+
 # Notifications (+ notify-send for scripts)
 mako-notifier
 libnotify-bin

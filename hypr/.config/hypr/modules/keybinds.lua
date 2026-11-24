@@ -17,11 +17,24 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 -- Reload every config (Hyprland, Waybar, kitty, hypridle)
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-reload"))
 
+-- Theme: light <-> dark (hypr-theme)
+hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-theme toggle"))
+
 -- Menus (rofi). SUPER+R above opens the app launcher.
 hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd("rofimoji --action copy --skin-tone neutral")) -- emoji / symbols
 hl.bind(mainMod .. " + equal",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-calc"))          -- calculator
 hl.bind(mainMod .. " + Tab",        hl.dsp.exec_cmd("$HOME/.local/bin/hypr-windows"))       -- window switcher
 hl.bind(mainMod .. " + SHIFT + V",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-clipboard"))     -- clipboard history
+-- Screenshots (hypr-screenshot): saved to ~/Pictures/Screenshots + clipboard
+hl.bind(mainMod .. " + SHIFT + S",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot area"))    -- drag an area
+hl.bind("Print",                    hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot area"))    -- (same)
+hl.bind("SHIFT + Print",            hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot screen"))  -- this monitor
+hl.bind("CTRL + Print",             hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot window"))  -- active window
+hl.bind(mainMod .. " + Print",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot menu"))    -- menu + delays
+
+-- Color picker: click any pixel, hex code is copied
+hl.bind(mainMod .. " + SHIFT + C",  hl.dsp.exec_cmd("c=$(hyprpicker -a -f hex) && notify-send -a 'Color picker' \"$c\" 'Copied to clipboard'"))
+
 -- Notifications (mako)
 hl.bind(mainMod .. " + N",          hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dismiss"))     -- dismiss newest
 hl.bind(mainMod .. " + SHIFT + N",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dismiss-all")) -- dismiss all
@@ -47,7 +60,7 @@ end
 
 -- Special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + ALT + S",   hl.dsp.window.move({ workspace = "special:magic" }))   -- SHIFT+S is the area screenshot
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))

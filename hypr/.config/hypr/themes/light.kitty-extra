@@ -1,0 +1,12 @@
+
+# --- 256-color overrides (light only) ----------------------------------------
+# Some programs pick from the 256-color palette, whose light entries are made
+# for dark backgrounds (~1.0-1.4:1 contrast on light grey, i.e. invisible).
+# Remap the common ones to ink versions of the same hue (all >= 4.5:1).
+color67  #3d5578
+color75  #2b4a75
+color76  #0b5c2c
+color81  #24566b
+color87  #1f5c5c
+color113 #2c5e3d
+color116 #2c5655

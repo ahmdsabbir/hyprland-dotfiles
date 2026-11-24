@@ -1,7 +1,13 @@
 -- See https://wiki.hypr.land/configuring/core/autostart/
 -- Runs once when Hyprland starts (not on reload).
 
+local theme = require("modules.theme")
+
 hl.on("hyprland.start", function ()
+    -- GTK/libadwaita apps follow the system color scheme; match the theme.
+    -- (Shared with the GNOME session, which uses the same setting.)
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme " .. theme.color_scheme)
+
     hl.exec_cmd("waybar")
 
     -- Idle: dim, lock, screens off (hypridle.conf). Guard against a second

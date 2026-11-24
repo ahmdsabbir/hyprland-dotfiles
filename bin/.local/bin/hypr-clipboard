@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Clipboard history: pick a previous copy in rofi and copy it again.
 #
-# Usage: hypr-clipboard          pick from history (SUPER+SHIFT+V)
+# Usage: hypr-clipboard          open the history (SUPER+SHIFT+V, Waybar 󰅌)
 #        hypr-clipboard --clear  wipe the history
+#
+# In the menu:  Enter = copy it again · Shift+Delete = remove it from history
+#               (the list reopens, so you can remove several) · Esc = close
 #
 # History is recorded by `wl-paste --watch cliphist store` (started in
 # Hyprland's autostart). Needs cliphist and wl-clipboard.
@@ -18,11 +21,28 @@ if [[ "${1:-}" == "--clear" ]]; then
     exit 0
 fi
 
-# cliphist lines are "<id>\t<preview>": show only the preview column, but
-# return the whole line so decode gets the exact entry.
-choice="$(cliphist list | rofi -dmenu -i -p clipboard -no-show-icons \
-    -display-columns 2 -display-column-separator $'\t' \
-    -theme-str 'entry { placeholder: "Search clipboard history"; } element { padding: 10px 14px; }')" || exit 0
-[[ -n "$choice" ]] || exit 0
+while :; do
+    entries="$(cliphist list)"
+    hint="Enter: copy · Shift+Delete: remove from history"
+    [[ -z "$entries" ]] && hint="Clipboard history is empty"
 
-printf '%s' "$choice" | cliphist decode | wl-copy
+    # cliphist lines are "<id>\t<preview>": show only the preview column, but
+    # return the whole line so decode/delete get the exact entry.
+    # Shift+Delete is rofi's own "delete entry" key: free it, bind it to custom-1.
+    choice="$(printf '%s' "$entries" | rofi -dmenu -i -p clipboard -no-show-icons \
+        -display-columns 2 -display-column-separator $'\t' \
+        -kb-delete-entry "" -kb-custom-1 "shift+Delete" \
+        -mesg "$hint" \
+        -theme-str 'entry { placeholder: "Search clipboard history"; } element { padding: 10px 14px; }')"
+    status=$?
+
+    case "$status" in
+        0)  # Enter: copy it again
+            [[ -n "$choice" ]] && printf '%s' "$choice" | cliphist decode | wl-copy
+            exit 0 ;;
+        10) # Shift+Delete: remove, then show the list again
+            [[ -n "$choice" ]] && printf '%s\n' "$choice" | cliphist delete
+            ;;
+        *)  exit 0 ;;  # Esc
+    esac
+done

@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# Screenshots: save to ~/Pictures/Screenshots and copy to the clipboard.
+#
+# Usage: hypr-screenshot area          drag to select (screen frozen)   Print
+#        hypr-screenshot screen        the focused monitor              SHIFT+Print
+#        hypr-screenshot window        the active window                CTRL+Print
+#        hypr-screenshot all           every monitor
+#        hypr-screenshot menu          pick one in rofi (+ delays)      SUPER+Print
+#
+#   --delay N   wait N seconds first (e.g. to open a menu)
+#
+# A notification shows the result: click it to annotate (swappy), or "Open".
+# Needs grim, slurp, wl-clipboard; hyprpicker freezes the screen while
+# selecting an area (optional).
+
+set -uo pipefail
+
+SELF="$0"
+DIR="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")/Screenshots"
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+die() { notify-send -u low -a Screenshot "Screenshot failed" "$1" 2>/dev/null; echo "hypr-screenshot: $1" >&2; exit 1; }
+
+for cmd in grim wl-copy; do
+    command -v "$cmd" >/dev/null || die "$cmd is not installed (see packages.ubuntu.txt)"
+done
+
+mode="${1:-}"; shift || true
+delay=0
+while (( $# )); do
+    case "$1" in
+        --delay) delay="${2:-0}"; shift ;;
+        *) die "unknown option: $1" ;;
+    esac
+    shift
+done
+
+# --- Menu ----------------------------------------------------------------------
+
+if [[ "$mode" == menu ]]; then
+    labels=( "Area" "Window" "Screen" "All screens" "Area in 3 s" "Screen in 5 s" "Window in 5 s" )
+    icons=(  "selection" "window" "video-display" "video-display" "selection" "video-display" "window" )
+    args=(   "area" "window" "screen" "all" "area --delay 3" "screen --delay 5" "window --delay 5" )
+    pick="$(for i in "${!labels[@]}"; do printf '%s\0icon\x1f%s\n' "${labels[$i]}" "${icons[$i]}"; done \
+        | rofi -dmenu -i -format i -p screenshot \
+            -theme-str 'entry { placeholder: "Screenshot"; } listview { lines: 7; }')" || exit 0
+    [[ "$pick" =~ ^[0-9]+$ ]] || exit 0
+    sleep 0.3   # let rofi's window disappear before capturing
+    # shellcheck disable=SC2086
+    exec "$SELF" ${args[$pick]}
+fi
+
+# --- Selection colors from the active theme palette ------------------------------
+
+palette_color() {  # key -> hex (no #), from the current theme's .colors file
+    local theme="light" file
+    [[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles/theme" ]] \
+        && read -r theme < "${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles/theme"
+    file="$CFG/hypr/themes/$theme.colors"
+    [[ -f "$file" ]] && sed -nE "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*([0-9a-fA-F]{6}).*/\1/p" "$file" | head -n1
+}
+
+# --- Capture -------------------------------------------------------------------
+
+mkdir -p "$DIR"
+file="$DIR/Screenshot_$(date +%Y-%m-%d_%H-%M-%S).png"
+
+if (( delay > 0 )); then
+    notify-send -u low -t $(( delay * 1000 )) -a Screenshot "Screenshot in ${delay}s" 2>/dev/null
+    sleep "$delay"
+fi
+
+case "$mode" in
+    area)
+        command -v slurp >/dev/null || die "slurp is not installed"
+        frame="$(palette_color accent)"; frame="${frame:-474747}"
+        # Freeze the screen so menus/tooltips stay put while selecting.
+        freeze_pid=""
+        if command -v hyprpicker >/dev/null; then
+            hyprpicker -r -z >/dev/null 2>&1 & freeze_pid=$!
+            sleep 0.1
+        fi
+        geometry="$(slurp -d -b 00000033 -c "${frame}ff" -s 00000000 -w 2)"
+        status=$?
+        [[ -n "$freeze_pid" ]] && kill "$freeze_pid" 2>/dev/null
+        (( status == 0 )) && [[ -n "$geometry" ]] || exit 0   # Esc: cancelled
+        sleep 0.05
+        grim -g "$geometry" "$file" || die "capture failed"
+        ;;
+    window)
+        geometry="$(hyprctl activewindow -j | python3 -c '
+import json, sys
+w = json.load(sys.stdin)
+if w.get("at"): print("%d,%d %dx%d" % (w["at"][0], w["at"][1], w["size"][0], w["size"][1]))
+')"
+        [[ -n "$geometry" ]] || die "no active window"
+        grim -g "$geometry" "$file" || die "capture failed"
+        ;;
+    screen)
+        output="$(hyprctl monitors -j | python3 -c '
+import json, sys
+print(next((m["name"] for m in json.load(sys.stdin) if m.get("focused")), ""))
+')"
+        grim ${output:+-o "$output"} "$file" || die "capture failed"
+        ;;
+    all)
+        grim "$file" || die "capture failed"
+        ;;
+    -h|--help|"")
+        sed -n '2,15p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *)
+        die "unknown mode: $mode (area|screen|window|all|menu)" ;;
+esac
+
+wl-copy --type image/png < "$file"
+
+# --- Notify (in the background, so the keybind returns at once) ------------------
+
+(
+    action="$(notify-send -a Screenshot -i "$file" \
+        -A default=Annotate -A open=Open \
+        "Screenshot saved" "Copied to clipboard · click to annotate\n${file/#$HOME/\~}" 2>/dev/null)"
+    case "$action" in
+        default) command -v swappy >/dev/null && swappy -f "$file" -o "$file" ;;
+        open)    xdg-open "$file" >/dev/null 2>&1 ;;
+    esac
+) >/dev/null 2>&1 &
+disown

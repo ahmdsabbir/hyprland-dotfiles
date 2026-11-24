@@ -17,4 +17,4 @@ configuration {
     cycle:               true;
 }
 
-@theme "~/.config/rofi/themes/light.rasi"
+@theme "~/.config/rofi/layout.rasi"

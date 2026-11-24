@@ -1,0 +1,48 @@
+# Light: monotone ink on grey paper (inspired by "hyprink monotone").
+# THE palette for this theme: Hyprland reads it directly; hypr-theme renders
+# themes/templates/* from it for kitty, Waybar, rofi, hyprlock, mako and GTK.
+# Format: key = value (hex without "#"). Run `hypr-theme apply` after editing.
+
+color_scheme = prefer-light   # GTK / browsers / Electron
+
+# --- UI --------------------------------------------------------------------
+base      = d9d9d9   # desktop background
+surface   = cccccc   # windows, panels, terminal background
+surface2  = c2c2c2   # bar pills, header bars, sidebars
+raised    = d9d9d9   # cards, popovers (stand out from surface)
+overlay   = a8a8a8   # inactive pills / borders
+border    = 7a7a7a   # active window border
+frame     = 474747   # panel borders (launcher, notifications)
+muted     = 828282   # placeholders, faint hints
+subtext   = 646464   # secondary text
+text      = 3b3b3b   # primary text
+accent    = 474747   # selection, active workspace
+accent_fg = c8c8c8   # text on accent
+sel_bg    = b0b0b0   # text selection (terminal)
+sel_fg    = 3b3b3b
+shadow    = 8f8f8f
+
+# --- Status ink (all >= 4.5:1 on surface) ----------------------------------
+green     = 0b5c2c
+red       = 8a2f2f
+yellow    = 6b5410
+blue      = 2b4a75
+on_status = d9d9d9   # text on a status-colored background
+
+# --- Terminal ANSI colors (kitty; the zsh prompt uses these) ---------------
+c0  = 3b3b3b
+c1  = 8a2f2f
+c2  = 0b5c2c
+c3  = 6b5410
+c4  = 2b4a75
+c5  = 663d69
+c6  = 1f5c5c
+c7  = 555555   # "white": dark enough to read on the light background
+c8  = 6b6b6b   # bright black: deliberately faint (hints, autosuggestions)
+c9  = 7a3a3a
+c10 = 2c5e3d
+c11 = 62501c
+c12 = 3d5578
+c13 = 6a4a6d
+c14 = 2c5655
+c15 = 474747

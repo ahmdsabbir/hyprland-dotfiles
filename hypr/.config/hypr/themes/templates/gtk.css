@@ -1,0 +1,42 @@
+        /* {{name}} */
+        --accent-bg-color:      #{{accent}};
+        --accent-fg-color:      #{{accent_fg}};
+        --accent-color:         #{{text}};
+
+        --window-bg-color:      #{{surface}};
+        --window-fg-color:      #{{text}};
+        --view-bg-color:        #{{surface}};
+        --view-fg-color:        #{{text}};
+
+        --headerbar-bg-color:       #{{surface2}};
+        --headerbar-fg-color:       #{{text}};
+        --headerbar-backdrop-color: #{{surface}};
+        --headerbar-shade-color:    rgba(0, 0, 0, 0.08);
+
+        --sidebar-bg-color:           #{{surface2}};
+        --sidebar-fg-color:           #{{text}};
+        --sidebar-backdrop-color:     #{{surface}};
+        --secondary-sidebar-bg-color: #{{surface}};
+        --secondary-sidebar-fg-color: #{{text}};
+
+        --card-bg-color:        #{{raised}};
+        --card-fg-color:        #{{text}};
+        --dialog-bg-color:      #{{surface}};
+        --dialog-fg-color:      #{{text}};
+        --popover-bg-color:     #{{raised}};
+        --popover-fg-color:     #{{text}};
+        --thumbnail-bg-color:   #{{raised}};
+        --thumbnail-fg-color:   #{{text}};
+
+        --destructive-bg-color: #{{red}};
+        --destructive-fg-color: #{{on_status}};
+        --destructive-color:    #{{red}};
+        --success-bg-color:     #{{green}};
+        --success-fg-color:     #{{on_status}};
+        --success-color:        #{{green}};
+        --warning-bg-color:     #{{yellow}};
+        --warning-fg-color:     #{{on_status}};
+        --warning-color:        #{{yellow}};
+        --error-bg-color:       #{{red}};
+        --error-fg-color:       #{{on_status}};
+        --error-color:          #{{red}};

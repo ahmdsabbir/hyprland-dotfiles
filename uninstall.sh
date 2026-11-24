@@ -246,10 +246,23 @@ reload_hyprland() {
     hyprctl reload >/dev/null && log "Reloaded running Hyprland."
 }
 
+# Generated theme files (kitty/Waybar/rofi/hyprlock/mako/GTK colors) live in
+# the apps' config folders, outside the repo: remove them first.
+clean_theme() {
+    local theme="$REPO/bin/.local/bin/hypr-theme"
+    [[ -x "$theme" ]] || return 0
+    if (( DRY_RUN )); then
+        printf '   [dry-run] hypr-theme clean (remove generated theme files)\n'
+    else
+        "$theme" clean | sed 's/^/:: /'
+    fi
+}
+
 (( DRY_RUN )) && log "Dry run: nothing will be changed."
 if [[ ! -f "$STATE_LOG" ]]; then
     warn "No change log at $STATE_LOG."
     warn "Removing repo symlinks and restoring the newest .bak files only; packages are left alone."
+    clean_theme
     unlink_all
     restore_latest_backups
     reload_hyprland
@@ -257,6 +270,7 @@ if [[ ! -f "$STATE_LOG" ]]; then
     exit 0
 fi
 
+clean_theme
 unlink_all
 restore_backups
 remove_dirs
