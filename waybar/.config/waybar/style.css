@@ -143,6 +143,20 @@ window#waybar {
     color: @accent_fg;
 }
 
+/* --- Notifications bell --------------------------------------------------- */
+
+#custom-notifications {
+    background: @surface2;
+    color: @subtext;
+    padding: 0 10px;
+    border-radius: 6px;
+}
+
+#custom-notifications.dnd {
+    background: @overlay;
+    color: @accent;
+}
+
 /* --- Power button and its dropdown menu --------------------------------- */
 
 #custom-power {

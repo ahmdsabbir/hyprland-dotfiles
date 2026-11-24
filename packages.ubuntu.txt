@@ -14,6 +14,9 @@ waybar
 nautilus
 # Audio mixer (Waybar right-click on volume/mic), opens in kitty
 pulsemixer
+# Notifications (+ notify-send for scripts)
+mako-notifier
+libnotify-bin
 
 # Used by keybinds (wpctl, brightness, media keys)
 wireplumber

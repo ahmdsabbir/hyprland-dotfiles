@@ -22,6 +22,12 @@ hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd("rofimoji --action copy --sk
 hl.bind(mainMod .. " + equal",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-calc"))          -- calculator
 hl.bind(mainMod .. " + Tab",        hl.dsp.exec_cmd("$HOME/.local/bin/hypr-windows"))       -- window switcher
 hl.bind(mainMod .. " + SHIFT + V",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-clipboard"))     -- clipboard history
+-- Notifications (mako)
+hl.bind(mainMod .. " + N",          hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dismiss"))     -- dismiss newest
+hl.bind(mainMod .. " + SHIFT + N",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dismiss-all")) -- dismiss all
+hl.bind(mainMod .. " + CTRL + N",   hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify restore"))     -- show last again
+hl.bind(mainMod .. " + ALT + N",    hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dnd"))         -- do not disturb
+
 hl.bind(mainMod .. " + L",          hl.dsp.exec_cmd("$HOME/.local/bin/hypr-power lock"))    -- lock screen
 hl.bind(mainMod .. " + Escape",     hl.dsp.exec_cmd("$HOME/.local/bin/hypr-power menu"))    -- power menu
 

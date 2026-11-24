@@ -20,7 +20,7 @@ My Hyprland setup, built from scratch on top of the stock config.
 | Lock screen   | hyprlock      |
 | Idle daemon   | hypridle      |
 | File manager  | Nautilus      |
-| Notifications | _TBD_         |
+| Notifications | mako          |
 
 ## Install
 
@@ -108,6 +108,7 @@ restores the newest `<file>.bak.*`.
 | `waybar`| `~/.config/waybar/` |
 | `kitty` | `~/.config/kitty/`  |
 | `rofi`  | `~/.config/rofi/`   |
+| `mako`  | `~/.config/mako/`   |
 | `zsh`   | `~/.oh-my-zsh/custom/themes/` (prompt theme; needs zsh + oh-my-zsh) |
 
 ## Reloading
@@ -167,6 +168,24 @@ open, so it uses no memory in the background.
 Calculator examples: `2^10`, `15% * 80`, `5 km to mi`, `90 min to h`,
 `100 fahrenheit to celsius`, `50 USD to EUR` (offline exchange rates),
 `now + 3 days`.
+
+## Notifications
+
+mako (`mako/.config/mako/config`): top-right pop-ups in the light palette,
+small app name + bold title + body, icons on the left. Low urgency is faint
+and leaves after 3 s, normal after 5 s, critical has a red border and stays.
+Repeats from the same app/title are grouped with a count; at most 4 visible.
+
+| Action                    | Mouse / bar                 | Keys            |
+| ------------------------- | --------------------------- | --------------- |
+| run the notification's action | left-click it           |                 |
+| dismiss                   | right-click it              | SUPER + N       |
+| dismiss all               | middle-click it, or right-click the bell | SUPER + SHIFT + N |
+| bring back the last one   | middle-click the bell       | SUPER + CTRL + N |
+| do not disturb            | click the bell (󰂚 / 󰂛)      | SUPER + ALT + N |
+
+Do-not-disturb hides everything except critical notifications. History keeps
+the last 20. Try it: `notify-send "Hello" "This is a test"`.
 
 ## Lock screen and idle
 

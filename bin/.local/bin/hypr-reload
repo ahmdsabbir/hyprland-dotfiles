@@ -10,7 +10,7 @@
 # Steps:
 #   1. Verify the Hyprland config; stop here if it has errors.
 #   2. Reload Hyprland and report errors from the running session.
-#   3. Signal Waybar (USR2) and kitty (USR1) to reload, if running.
+#   3. Signal Waybar (USR2) and kitty (USR1), and reload mako, if running.
 #      (rofi needs nothing: it reads its config every time it opens.)
 #   4. Restart hypridle, if it's running.
 #
@@ -96,6 +96,12 @@ if pkill -USR1 -x kitty 2>/dev/null; then
     ok "kitty reloaded"
 else
     skip "kitty: not running"
+fi
+
+if pgrep -x mako >/dev/null && makoctl reload 2>/dev/null; then
+    ok "mako reloaded"
+else
+    skip "mako: not running"
 fi
 
 # --- 4. hypridle ------------------------------------------------------------

@@ -1,0 +1,68 @@
+# mako: notifications (light theme). Palette: keep in sync with
+# hypr/.config/hypr/themes/light.lua. Docs: man 5 mako
+# Reload: makoctl reload (hypr-reload does it).
+#
+# Mouse: left = run the notification's action, right = dismiss,
+#        middle = dismiss all.
+# Keys:  SUPER+N dismiss · SUPER+SHIFT+N dismiss all ·
+#        SUPER+CTRL+N bring back the last one · SUPER+ALT+N do-not-disturb
+
+# --- Look --------------------------------------------------------------------
+
+font=Liberation Mono 11
+background-color=#cccccc
+text-color=#3b3b3b
+border-color=#474747
+border-size=2
+border-radius=6
+padding=14,16
+progress-color=over #a8a8a8
+
+width=380
+height=180
+margin=6
+anchor=top-right
+layer=top
+
+icons=1
+icon-location=left
+max-icon-size=40
+
+# Small faint app name, bold title, then the body.
+format=<span size="small" foreground="#646464">%a</span>\n<b>%s</b>\n%b
+
+# --- Behaviour ---------------------------------------------------------------
+
+default-timeout=5000
+ignore-timeout=0
+max-visible=4
+sort=-time
+group-by=app-name,summary
+history=1
+max-history=20
+
+on-button-left=invoke-default-action
+on-button-right=dismiss
+on-button-middle=dismiss-all
+
+# --- Variants ----------------------------------------------------------------
+
+[grouped]
+format=<span size="small" foreground="#646464">%a · %g</span>\n<b>%s</b>\n%b
+
+[urgency=low]
+text-color=#646464
+border-color=#a8a8a8
+default-timeout=3000
+
+# Critical: red border, stays until dismissed.
+[urgency=critical]
+border-color=#8a2f2f
+default-timeout=0
+
+# Do-not-disturb hides everything except critical notifications.
+[mode=do-not-disturb]
+invisible=1
+
+[mode=do-not-disturb urgency=critical]
+invisible=0

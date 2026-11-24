@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Notification controls (mako), shared by the Waybar bell and keybinds.
+#
+# Usage: hypr-notify dnd          toggle do-not-disturb      (SUPER+ALT+N, bell click)
+#        hypr-notify dismiss      dismiss the newest          (SUPER+N)
+#        hypr-notify dismiss-all  dismiss all                 (SUPER+SHIFT+N, bell right-click)
+#        hypr-notify restore      bring back the last one     (SUPER+CTRL+N, bell middle-click)
+#        hypr-notify status       Waybar JSON for the bell
+
+set -uo pipefail
+
+command -v makoctl >/dev/null || { echo "mako is not installed (see packages.ubuntu.txt)" >&2; exit 1; }
+
+refresh_bar() { pkill -RTMIN+9 -x waybar 2>/dev/null || true; }
+dnd_on()      { makoctl mode 2>/dev/null | grep -qx do-not-disturb; }
+
+case "${1:-}" in
+    dnd)
+        makoctl mode -t do-not-disturb >/dev/null
+        refresh_bar
+        ;;
+    dismiss)     makoctl dismiss ;;
+    dismiss-all) makoctl dismiss --all ;;
+    restore)     makoctl restore ;;
+    status)
+        if dnd_on; then
+            printf '{"text": "󰂛", "class": "dnd", "tooltip": "Do not disturb (critical notifications still show)\\nclick: turn off · right-click: dismiss all · middle-click: show last"}\n'
+        else
+            printf '{"text": "󰂚", "class": "normal", "tooltip": "Notifications\\nclick: do not disturb · right-click: dismiss all · middle-click: show last"}\n'
+        fi
+        ;;
+    -h|--help|"") sed -n '2,9p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ;;
+    *) echo "Unknown action: $1 (see --help)" >&2; exit 2 ;;
+esac

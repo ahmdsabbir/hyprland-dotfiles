@@ -12,7 +12,7 @@
 
     "modules-left": ["hyprland/workspaces"],
     "modules-center": [],
-    "modules-right": ["privacy", "cpu", "memory", "tray", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/power"],
+    "modules-right": ["privacy", "cpu", "memory", "tray", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/notifications", "custom/power"],
 
     // Workspaces as plain pills, shaded by state (see style.css):
     // active = dark and wider, has apps = grey, empty = faint.
@@ -130,6 +130,20 @@
         "format": "{:%d/%m %H:%M}",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": { "mode": "month", "weeks-pos": "" }
+    },
+
+    // Notifications (mako): bell, or a crossed bell in do-not-disturb.
+    // click: toggle DND · right-click: dismiss all · middle-click: show last.
+    // Refreshed on demand (signal 9) by hypr-notify; no polling.
+    "custom/notifications": {
+        "exec": "$HOME/.local/bin/hypr-notify status",
+        "return-type": "json",
+        "interval": "once",
+        "signal": 9,
+        "on-click": "$HOME/.local/bin/hypr-notify dnd",
+        "on-click-right": "$HOME/.local/bin/hypr-notify dismiss-all",
+        "on-click-middle": "$HOME/.local/bin/hypr-notify restore",
+        "exec-on-event": true
     },
 
     // Power: click for a dropdown menu (power-menu.xml).
