@@ -10,9 +10,9 @@
     "margin-right": 6,
     "spacing": 6,
 
-    "modules-left": ["hyprland/workspaces"],
+    "modules-left": ["hyprland/workspaces", "tray"],
     "modules-center": [],
-    "modules-right": ["privacy", "cpu", "memory", "tray", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/clipboard", "custom/notifications", "custom/power"],
+    "modules-right": ["privacy", "group/resources", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/clipboard", "custom/notifications", "custom/power"],
 
     // Workspaces as plain pills, shaded by state (see style.css):
     // active = dark and wider, has apps = grey, empty = faint.
@@ -36,7 +36,13 @@
         ]
     },
 
-    // CPU / RAM: always shown; the pill darkens when usage is high.
+    // CPU + RAM share one pill (styled as #resources in style.css).
+    "group/resources": {
+        "orientation": "inherit",
+        "modules": ["cpu", "memory"]
+    },
+
+    // CPU / RAM: always shown; a value's half of the pill darkens when high.
     // Reading /proc every few seconds costs microseconds; no extra process.
     "cpu": {
         "interval": 5,
@@ -57,7 +63,8 @@
         "on-click": "kitty --class hypr-top -e htop"
     },
 
-    // Tray icons from apps (Slack, Solaar, Remmina...). Hidden when empty.
+    // Tray icons from apps (Chrome, Slack, Solaar...), next to the workspace
+    // pills. Hidden when empty.
     "tray": {
         "icon-size": 16,
         "spacing": 8,

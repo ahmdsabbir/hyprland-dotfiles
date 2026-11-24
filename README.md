@@ -139,9 +139,9 @@ shows its own monitor's three.
 | Mic     | `27% 󰍬`                | mute             | mic ±5%      | mixer (pulsemixer)     |
 | Network | Wi-Fi name + signal, or 󰈀 | Wi-Fi menu (`hypr-wifi`) | — | settings (nmtui)   |
 | Internet | `󰖟` online; `limited` / `login` / `offline` otherwise (checked every 30 s, `hypr-internet`) | re-check; opens the login page on captive portals | — | — |
-| CPU / RAM | `15% 󰻠` `64% 󰍛`; pill darkens above 85% / 80% | htop | — | — |
+| CPU / RAM | one pill: `20% 󰻠  32% 󰍛`; a value's half darkens above 85% / 80% | htop | — | — |
 | Privacy | only while mic / screen share is in use | — | — | — |
-| Tray    | app tray icons (Slack, Solaar, ...); hidden when empty | app menu | — | app menu |
+| Tray    | app tray icons (Chrome, Slack, Solaar, ...), left, next to the workspace pills; hidden when empty | app menu | — | app menu |
 | Clipboard | `󰅌` | clipboard history (Enter copies, Shift+Delete removes) | — | — |
 
 `hypr-wifi` lists nearby networks (strongest first): pick one to connect

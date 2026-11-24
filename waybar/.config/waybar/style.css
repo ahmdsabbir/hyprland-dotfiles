@@ -124,13 +124,21 @@ window#waybar {
     border-radius: 6px;
 }
 
-#cpu,
-#memory {
+/* CPU + RAM in one pill: the group is the pill, the modules sit inside. */
+#resources {
     background: @surface2;
-    color: @subtext;
-    padding: 0 10px;
     border-radius: 6px;
 }
+
+#cpu,
+#memory {
+    color: @subtext;
+    padding: 0 6px;
+    border-radius: 6px;
+}
+
+#cpu    { padding-left: 10px; }
+#memory { padding-right: 10px; }
 
 #cpu.warning,
 #memory.warning {
