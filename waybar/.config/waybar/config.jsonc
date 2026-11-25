@@ -3,11 +3,9 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 26,
-    // Match Hyprland's gaps_out (6) so the bar lines up with windows.
-    "margin-top": 6,
-    "margin-left": 6,
-    "margin-right": 6,
+    // Edge-to-edge bar with its own background and a bottom line
+    // (style.css); 34 = 26px pills + 4px above and below.
+    "height": 34,
     "spacing": 6,
 
     "modules-left": ["hyprland/workspaces", "tray"],

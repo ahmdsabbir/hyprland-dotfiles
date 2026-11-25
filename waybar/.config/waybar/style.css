@@ -13,8 +13,16 @@
 }
 
 window#waybar {
-    background: transparent;
+    background: @bar_bg;
+    border-bottom: 1px solid @bar_border;
     color: @subtext;
+}
+
+/* Breathing room around the pills inside the bar background. */
+.modules-left,
+.modules-center,
+.modules-right {
+    margin: 4px 6px;
 }
 
 /* --- Workspaces --------------------------------------------------------- */

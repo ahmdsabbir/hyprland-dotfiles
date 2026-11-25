@@ -12,3 +12,5 @@
 @define-color accent_fg #{{accent_fg}};
 @define-color green     #{{green}};
 @define-color red       #{{red}};
+@define-color bar_bg     #{{bar_bg}};
+@define-color bar_border #{{bar_border}};

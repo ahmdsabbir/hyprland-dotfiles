@@ -48,8 +48,9 @@ theme that switch everything at once.
 | SUPER + P | pseudo-tile |
 | SUPER + J | toggle split direction |
 | SUPER + arrows | move focus |
+| SUPER + SHIFT + arrows | swap the window with its neighbour (also across monitors) |
 | SUPER + Tab | window switcher (all workspaces) |
-| SUPER + drag left / right mouse | move / resize window |
+| SUPER + drag left / right mouse | move (drop on another window to swap) / resize window |
 | **Workspaces** | |
 | SUPER + 1…0 | go to workspace |
 | SUPER + SHIFT + 1…0 | move window to workspace |
