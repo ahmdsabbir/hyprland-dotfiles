@@ -9,8 +9,8 @@
     "spacing": 6,
 
     "modules-left": ["hyprland/workspaces", "tray"],
-    "modules-center": [],
-    "modules-right": ["privacy", "group/resources", "mpris", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "clock", "custom/clipboard", "custom/notifications", "custom/power"],
+    "modules-center": ["clock"],
+    "modules-right": ["privacy", "mpris", "pulseaudio", "pulseaudio#mic", "network", "custom/internet", "battery", "custom/clipboard", "group/resources", "custom/notifications", "custom/power"],
 
     // Workspaces as plain pills, shaded by state (see style.css):
     // active = dark and wider, has apps = grey, empty = faint.
@@ -144,7 +144,7 @@
 
     "clock": {
         "interval": 60,
-        "format": "{:%d/%m %H:%M}",
+        "format": "{:%a, %d %b · %I:%M %p}",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": { "mode": "month", "weeks-pos": "" }
     },

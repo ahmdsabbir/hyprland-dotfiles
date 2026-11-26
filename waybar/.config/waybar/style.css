@@ -118,6 +118,13 @@ window#waybar {
     color: @subtext;
 }
 
+/* A stopped player (e.g. a browser tab after media ends) still keeps the
+   module alive with empty text; drop the pill so no blank box is left. */
+#mpris.stopped {
+    background: transparent;
+    padding: 0;
+}
+
 /* --- Tray, privacy, resource warnings ------------------------------------ */
 
 #tray {
