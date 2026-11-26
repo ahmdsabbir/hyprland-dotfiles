@@ -55,6 +55,11 @@ hl.config({
 
         -- How much to darken behind layers with dim_around (the launcher).
         dim_around = look.dim_around,
+
+        -- Mute unfocused windows with a light dark overlay so the focused one
+        -- stands out beyond its border. A flat overlay, so it costs ~nothing.
+        dim_inactive = look.dim_inactive > 0,
+        dim_strength = look.dim_inactive,
     },
 
     animations = {

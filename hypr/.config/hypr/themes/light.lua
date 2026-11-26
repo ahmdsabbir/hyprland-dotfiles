@@ -10,6 +10,9 @@ return {
         -- Darken behind layers with dim_around (0 = off, 1 = black).
         dim_around = 0.15,
 
+        -- Darken unfocused windows (0 = off, 1 = black).
+        dim_inactive = 0.1,
+
         -- Launcher backdrop blur: radius and passes (more = softer, more GPU).
         blur_size   = 2,
         blur_passes = 1,
