@@ -172,18 +172,11 @@
         "exec-on-event": true
     },
 
-    // Power: click for a dropdown menu (power-menu.xml).
-    // Log out / restart / shut down ask for confirmation (bin/.local/bin/hypr-power).
+    // Power: click opens the power modal (hypr-power menu, rofi/power.rasi).
     "custom/power": {
         "format": "󰐥",
-        "tooltip": false,
-        "menu": "on-click",
-        "menu-file": "$HOME/.config/waybar/power-menu.xml",
-        "menu-actions": {
-            "lock": "$HOME/.local/bin/hypr-power lock",
-            "logout": "$HOME/.local/bin/hypr-power logout",
-            "reboot": "$HOME/.local/bin/hypr-power reboot",
-            "shutdown": "$HOME/.local/bin/hypr-power shutdown"
-        }
+        "tooltip": true,
+        "tooltip-format": "Power · click: lock, log out, restart, shut down (SUPER+Escape)",
+        "on-click": "$HOME/.local/bin/hypr-power menu"
     }
 }

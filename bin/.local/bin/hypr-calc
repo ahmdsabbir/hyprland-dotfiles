@@ -14,7 +14,8 @@ set -uo pipefail
 # Launched by the user: hand over to rofi, which calls us back below.
 if [[ -z "${ROFI_RETV:-}" ]]; then
     command -v qalc >/dev/null || { echo "qalc is not installed (see packages.ubuntu.txt)" >&2; exit 1; }
-    exec rofi -show calc -modi "calc:$0" -no-show-icons
+    exec rofi -show calc -modi "calc:$0" -no-show-icons \
+        -theme-str 'element { children: [ element-text ]; padding: 10px 14px; }'
 fi
 
 hint() {

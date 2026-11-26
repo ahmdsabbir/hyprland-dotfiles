@@ -1,66 +1,107 @@
 #!/usr/bin/env bash
-# Lock, log out, reboot or shut down (the last three after a confirmation dialog).
+# Power: lock, log out, restart, shut down.
 #
-# Usage: hypr-power lock|logout|reboot|shutdown [--yes]
-#        hypr-power menu      pick one in rofi (SUPER+Escape)
+# Usage: hypr-power menu                       the power modal (SUPER+Escape,
+#                                              Waybar power icon)
+#        hypr-power lock|logout|reboot|shutdown [--yes]
 #
-#   --yes   Skip the confirmation dialog.
+#   --yes   skip the confirmation
 #
-# Used by the Waybar power buttons. Confirmation uses zenity when available;
-# without it (and without --yes) nothing happens, to avoid accidents.
+# The modal (rofi, rofi/power.rasi) shows four big buttons over the blurred
+# backdrop. Arrows + Enter, a click, or a letter: L lock, E log out (exit),
+# R restart, S shut down. Log out / restart / shut down then ask in the same
+# style: Enter or Y confirms, Esc or N cancels (Cancel is preselected).
 
 set -uo pipefail
+
+SELF="$0"
+THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/power.rasi"
+ICON_FONT="FantasqueSansM Nerd Font"
 
 action="${1:-}"
 assume_yes=0
 [[ "${2:-}" == "--yes" ]] && assume_yes=1
 
-if [[ "$action" == lock ]]; then
-    # No confirmation: locking is harmless. One hyprlock at a time.
-    pidof hyprlock >/dev/null || exec hyprlock
-    exit 0
-fi
+# One button: big icon, then the label with its shortcut letter faded.
+button() {  # icon, label, key
+    printf "<span font='%s 30'>%s</span>\n%s  <span size='small' fgalpha='55%%'>%s</span>" \
+        "$ICON_FONT" "$1" "$2" "$3"
+}
 
-if [[ "$action" == menu ]]; then
-    # Rows with icons; -format i returns the picked row's index.
-    choice="$(printf '%s\0icon\x1f%s\n' \
-            "Lock"      system-lock-screen \
-            "Log out"   system-log-out \
-            "Restart"   system-reboot \
-            "Shut down" system-shutdown \
-        | rofi -dmenu -i -format i -p power -theme-str 'entry { placeholder: "Power"; } listview { lines: 4; }')" || exit 0
-    case "$choice" in
-        0) exec "$0" lock ;;
-        1) exec "$0" logout ;;
-        2) exec "$0" reboot ;;
-        3) exec "$0" shutdown ;;
-        *) exit 0 ;;
+# Show buttons ($@) in the modal; print the picked index (or custom key code).
+modal() {  # message, extra rofi args..., then "--", buttons...
+    local mesg="$1"; shift
+    local -a args=()
+    while [[ "$1" != "--" ]]; do args+=("$1"); shift; done
+    shift
+    local IFS='|'
+    printf '%s' "$*" | rofi -dmenu -sep '|' -eh 3 -markup-rows -format i -no-custom \
+        -theme "$THEME" -mesg "$mesg" "${args[@]}"
+}
+
+uptime_short() {
+    local s
+    s="$(uptime -p 2>/dev/null | sed -e 's/^up //' -e 's/ hours\?/h/' -e 's/ minutes\?/m/' -e 's/ days\?/d/' -e 's/ weeks\?/w/' -e 's/,//g')"
+    printf '%s' "${s:-?}"
+}
+
+# Ask before logout / restart / shutdown. Returns 0 to go ahead.
+confirm() {  # question, icon, label
+    (( assume_yes )) && return 0
+    local pick
+    pick="$(modal "$1" -selected-row 0 \
+                -kb-custom-1 y -kb-custom-2 n \
+                -theme-str 'mainbox { width: 420px; } listview { columns: 2; }' \
+                -- "$(button "󰜺" "Cancel" "N")" "$(button "$2" "$3" "Y")")"
+    case $? in
+        0)  [[ "$pick" == 1 ]] ;;   # Enter / click: only the action button confirms
+        10) return 0 ;;             # Y
+        *)  return 1 ;;             # N, Esc
     esac
-fi
+}
 
 case "$action" in
-    logout)   title="Log out?";   text="End this Hyprland session?";  ok="Log out" ;;
-    reboot)   title="Restart?";   text="Restart the computer?";        ok="Restart" ;;
-    shutdown) title="Shut down?"; text="Shut down the computer?";      ok="Shut down" ;;
-    -h|--help|"") sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    *) echo "Unknown action: $action (lock|logout|reboot|shutdown|menu)" >&2; exit 2 ;;
-esac
-
-if (( ! assume_yes )); then
-    command -v zenity >/dev/null || { echo "zenity not installed; use --yes to skip confirmation." >&2; exit 1; }
-    zenity --question --title="$title" --text="$text" \
-        --ok-label="$ok" --cancel-label="Cancel" --width=280 2>/dev/null || exit 0
-fi
-
-case "$action" in
+    menu)
+        pick="$(modal "$USER · up $(uptime_short)" \
+                    -kb-custom-1 l -kb-custom-2 e -kb-custom-3 r -kb-custom-4 s \
+                    -- "$(button "󰌾" "Lock" "L")" "$(button "󰍃" "Log out" "E")" \
+                       "$(button "󰜉" "Restart" "R")" "$(button "󰐥" "Shut down" "S")")"
+        case $? in
+            0)  case "$pick" in 0) exec "$SELF" lock ;; 1) exec "$SELF" logout ;;
+                                2) exec "$SELF" reboot ;; 3) exec "$SELF" shutdown ;; esac ;;
+            10) exec "$SELF" lock ;;
+            11) exec "$SELF" logout ;;
+            12) exec "$SELF" reboot ;;
+            13) exec "$SELF" shutdown ;;
+        esac
+        exit 0
+        ;;
+    lock)
+        # No confirmation: locking is harmless. One hyprlock at a time.
+        pidof hyprlock >/dev/null || exec hyprlock
+        ;;
     logout)
-        # Prefer hyprshutdown (closes apps gracefully) if installed, like the stock SUPER+M bind.
+        confirm "End this Hyprland session?" "󰍃" "Log out" || exit 0
+        # Prefer hyprshutdown (closes apps gracefully) if installed.
         if command -v hyprshutdown >/dev/null; then
             hyprshutdown
         else
             hyprctl dispatch 'hl.dsp.exit()'
         fi
         ;;
-    reboot)   systemctl reboot ;;
-    shutdown) systemctl poweroff ;;
+    reboot)
+        confirm "Restart the computer?" "󰜉" "Restart" || exit 0
+        systemctl reboot
+        ;;
+    shutdown)
+        confirm "Shut down the computer?" "󰐥" "Shut down" || exit 0
+        systemctl poweroff
+        ;;
+    -h|--help|"")
+        sed -n '2,13p' "$SELF" | sed 's/^# \{0,1\}//'
+        ;;
+    *)
+        echo "Unknown action: $action (menu|lock|logout|reboot|shutdown)" >&2
+        exit 2
+        ;;
 esac

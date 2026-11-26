@@ -22,7 +22,7 @@ set -uo pipefail
 
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}"
 THEMES="${HYPR_THEMES_DIR:-$CFG/hypr/themes}"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/yonko"
 STATE="$STATE_DIR/theme"
 DEFAULT=light
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

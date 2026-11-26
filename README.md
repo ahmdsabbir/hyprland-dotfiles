@@ -1,4 +1,4 @@
-# hyprland-dotfiles
+# yonko
 
 My Hyprland setup: minimal, monotone, easy on the eyes and light on the
 machine. Built from scratch on top of the stock config, with a light and a dark
@@ -21,7 +21,7 @@ theme that switch everything at once.
 | Terminal        | kitty                                  |
 | Notifications   | mako                                   |
 | Lock / idle     | hyprlock / hypridle                    |
-| Screenshots     | grim + slurp, swappy (annotate), hyprpicker |
+| Screenshots     | grim + slurp, swappy (annotate), hyprpicker, tesseract (OCR) |
 | Clipboard       | cliphist + wl-clipboard                |
 | Shell prompt    | zsh + oh-my-zsh, custom `yonko` theme  |
 | File manager    | Nautilus                               |
@@ -29,7 +29,9 @@ theme that switch everything at once.
 
 ## Keybindings
 
-`SUPER` is the Windows key.
+`SUPER` is the Windows key. **SUPER + /** shows all of these in a searchable
+cheat sheet, read live from Hyprland (`hypr-keys`; `hypr-keys --print` in a
+terminal).
 
 | Keys | Action |
 | --- | --- |
@@ -42,6 +44,7 @@ theme that switch everything at once.
 | SUPER + . | emoji / symbols |
 | SUPER + SHIFT + V | clipboard history |
 | SUPER + SHIFT + C | color picker (copies the hex code) |
+| SUPER + / | keybinding cheat sheet |
 | **Windows** | |
 | SUPER + C | close window |
 | SUPER + V | toggle floating |
@@ -64,6 +67,7 @@ theme that switch everything at once.
 | SHIFT + Print | current monitor |
 | CTRL + Print | active window |
 | SUPER + Print | screenshot menu (with 3 s / 5 s delays) |
+| SUPER + SHIFT + X | copy the **text** in an area (OCR) |
 | **Notifications** | |
 | SUPER + N | dismiss newest |
 | SUPER + SHIFT + N | dismiss all |
@@ -80,8 +84,8 @@ theme that switch everything at once.
 ## Install
 
 ```sh
-git clone git@github.com:ahmdsabbir/hyprland-dotfiles.git ~/hyprland-dotfiles
-cd ~/hyprland-dotfiles
+git clone git@github.com:ahmdsabbir/yonko.git ~/yonko
+cd ~/yonko
 ./install.sh --dry-run   # preview
 ./install.sh
 ```
@@ -97,7 +101,7 @@ cd ~/hyprland-dotfiles
 6. Reloads everything (`hypr-reload`) and reports config errors.
 
 It is safe to re-run, and records every change in
-`~/.local/state/hyprland-dotfiles/changes.log` so `uninstall.sh` can undo it.
+`~/.local/state/yonko/changes.log` so `uninstall.sh` can undo it.
 
 | Option          | Effect                                               |
 | --------------- | ---------------------------------------------------- |
@@ -181,12 +185,19 @@ rarely; no custom scripts run in the background.
 | Clock | `24/11 10:59` | — | — | — (hover: calendar) |
 | Clipboard | `󰅌` | clipboard history | — | — |
 | Notifications | `󰂚`, or `󰂛` in do-not-disturb | do not disturb | — | dismiss all (middle-click: show last) |
-| Power | `󰐥` | menu: lock, log out, restart, shut down | — | — |
+| Power | `󰐥` | power modal (see below) | — | — |
 
 The Wi-Fi menu (`hypr-wifi`) lists nearby networks, strongest first: pick one
 to connect (a password is asked only for new secured networks), or disconnect,
 rescan, or turn Wi-Fi on/off. The mixer, nmtui and htop open in kitty as
-centered floating windows. Log out / restart / shut down ask for confirmation.
+centered floating windows.
+
+**Power modal** (power icon, or SUPER + Escape): four big buttons over the
+blurred backdrop, with your user name and uptime on top. Click, use the arrows +
+Enter, or press a letter: **L** lock, **E** log out, **R** restart, **S** shut
+down. Log out / restart / shut down then ask in the same style, with Cancel
+preselected: Enter on the action or **Y** confirms, **N** or Esc cancels
+(`hypr-power`, `rofi/power.rasi`).
 
 ## Launcher and menus
 
@@ -205,7 +216,8 @@ backdrop. It runs only while open.
 - **Clipboard history** (SUPER + SHIFT + V or the Waybar icon,
   `hypr-clipboard`): Enter copies again, Shift + Delete removes an entry,
   `hypr-clipboard --clear` wipes it all.
-- **Power menu** (SUPER + Escape, `hypr-power menu`).
+- **Power modal** (SUPER + Escape or the Waybar power icon, `hypr-power menu`):
+  see Waybar above.
 
 ## Notifications
 
@@ -225,7 +237,12 @@ clipboard. A notification shows a thumbnail: click it to annotate in swappy
 (arrows, boxes, text, blur), or choose "Open". While selecting an area the
 screen is frozen, so menus and tooltips stay put; Esc cancels.
 
-From a terminal: `hypr-screenshot area|screen|window|all [--delay N]`.
+**Copy text from the screen** (SUPER + SHIFT + X): drag over any text (an
+image, a video, an error dialog, a PDF that won't let you select) and the
+text lands in the clipboard; nothing is saved. Uses tesseract (English); only
+runs while you use it (about 1 s).
+
+From a terminal: `hypr-screenshot area|screen|window|all|text [--delay N]`.
 
 ## Lock screen and idle
 
@@ -287,7 +304,7 @@ configs include:
 | mako | `~/.config/mako/theme` | `config` (last line) |
 | GTK 4 | `~/.config/gtk-4.0/gtk.css` | GTK (both themes, chosen by color scheme) |
 
-Switching saves the choice in `~/.local/state/hyprland-dotfiles/theme`, sets the
+Switching saves the choice in `~/.local/state/yonko/theme`, sets the
 GTK color scheme (GTK apps, browsers and Electron apps that follow the system
 switch too; the GNOME session shares this setting), and reloads Hyprland,
 Waybar, kitty and mako live. rofi and hyprlock pick it up next time they open;
@@ -307,10 +324,10 @@ line normally, two inside a git repo so branch info never crowds what you type.
 ~ ❯
 ~/Downloads ❯
 
-hyprland-dotfiles on ⎇ main ⇡1 !1 ?1
+yonko on ⎇ main ⇡1 !1 ?1
 ❯
 
-hyprland-dotfiles/hypr on ⎇ main !1
+yonko/hypr on ⎇ main !1
 ✗ 1 ❯                                         took 12s
 ```
 
@@ -329,9 +346,9 @@ Each top-level folder is a Stow package that mirrors `$HOME`:
 | -------- | ------------------------------ | -------- |
 | `hypr`   | `~/.config/hypr/`              | Hyprland (Lua), themes, hyprlock, hypridle |
 | `bin`    | `~/.local/bin/`                | `hypr-*` helper scripts |
-| `waybar` | `~/.config/waybar/`            | bar layout, style, power menu |
+| `waybar` | `~/.config/waybar/`            | bar layout and style |
 | `kitty`  | `~/.config/kitty/`             | terminal |
-| `rofi`   | `~/.config/rofi/`              | launcher layout |
+| `rofi`   | `~/.config/rofi/`              | launcher layout, power modal |
 | `mako`   | `~/.config/mako/`              | notifications |
 | `zsh`    | `~/.oh-my-zsh/custom/themes/`  | prompt theme |
 
@@ -341,8 +358,8 @@ Each top-level folder is a Stow package that mirrors `$HOME`:
 | --- | --- |
 | `hypr-reload` | verify + reload Hyprland, Waybar, kitty, mako, hypridle (`-q` quiet, `-n` notify) |
 | `hypr-theme` | switch / re-generate themes |
-| `hypr-power` | lock, log out, restart, shut down, or `menu` |
-| `hypr-screenshot` | screenshots (area, screen, window, all, menu) |
+| `hypr-power` | power modal (`menu`), or `lock` / `logout` / `reboot` / `shutdown` (`--yes` skips confirming) |
+| `hypr-screenshot` | screenshots (area, screen, window, all, menu) and `text` (OCR) |
 | `hypr-clipboard` | clipboard history menu |
 | `hypr-calc` | calculator menu |
 | `hypr-windows` | window switcher |
@@ -350,6 +367,7 @@ Each top-level folder is a Stow package that mirrors `$HOME`:
 | `hypr-internet` | internet status for Waybar |
 | `hypr-notify` | notification controls (do-not-disturb, dismiss, restore) |
 | `hypr-dropdown` | drop-down terminal toggle |
+| `hypr-keys` | keybinding cheat sheet (`--print` for the terminal) |
 
 ### Hyprland config
 
@@ -366,7 +384,7 @@ Each top-level folder is a Stow package that mirrors `$HOME`:
 | `workspaces.lua` | 3 workspaces per monitor, left to right |
 | `misc.lua` | background, layers, permissions |
 | `input.lua` | keyboard, mouse, touchpad, gestures |
-| `keybinds.lua` | key and mouse bindings |
+| `keybinds.lua` | key and mouse bindings, each with a description ("Category: what it does") that the cheat sheet shows |
 | `rules.lua` | window and layer rules (floating tools, launcher blur) |
 | `theme.lua` | active theme: palette + look |
 | `host.lua` | loads `hosts/<hostname>.lua` (last) |

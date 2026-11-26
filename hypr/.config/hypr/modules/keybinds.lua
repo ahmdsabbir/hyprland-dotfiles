@@ -1,99 +1,126 @@
--- See https://wiki.hypr.land/configuring/core/binds/
+-- Key and mouse bindings. See https://wiki.hypr.land/configuring/core/binds/
+--
+-- Every bind carries a description, "Category: what it does", which the
+-- cheat sheet (SUPER+/, hypr-keys) reads from the running Hyprland, so it is
+-- always in sync. For a family of keys (arrows, 1..0), only the first gets a
+-- description, with "|label" naming the whole family: "Windows: Focus|arrows".
 
 local programs = require("modules.programs")
 local mainMod  = programs.mainMod
+local bin      = "$HOME/.local/bin/"
 
--- Apps and window actions
-hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(programs.terminal))   -- terminal
-hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-dropdown")) -- drop-down terminal
-local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(programs.fileManager))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + space", hl.dsp.exec_cmd(programs.menu))   -- app launcher
-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
-
--- Reload every config (Hyprland, Waybar, kitty, hypridle)
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-reload"))
-
--- Theme: light <-> dark (hypr-theme)
-hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("$HOME/.local/bin/hypr-theme toggle"))
-
--- Menus (rofi). SUPER+SPACE above opens the app launcher.
-hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd("rofimoji --action copy --skin-tone neutral")) -- emoji / symbols
-hl.bind(mainMod .. " + equal",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-calc"))          -- calculator
-hl.bind(mainMod .. " + Tab",        hl.dsp.exec_cmd("$HOME/.local/bin/hypr-windows"))       -- window switcher
-hl.bind(mainMod .. " + SHIFT + V",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-clipboard"))     -- clipboard history
--- Screenshots (hypr-screenshot): saved to ~/Pictures/Screenshots + clipboard
-hl.bind(mainMod .. " + SHIFT + S",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot area"))    -- drag an area
-hl.bind("Print",                    hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot area"))    -- (same)
-hl.bind("SHIFT + Print",            hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot screen"))  -- this monitor
-hl.bind("CTRL + Print",             hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot window"))  -- active window
-hl.bind(mainMod .. " + Print",      hl.dsp.exec_cmd("$HOME/.local/bin/hypr-screenshot menu"))    -- menu + delays
-
--- Color picker: click any pixel, hex code is copied
-hl.bind(mainMod .. " + SHIFT + C",  hl.dsp.exec_cmd("c=$(hyprpicker -a -f hex) && notify-send -a 'Color picker' \"$c\" 'Copied to clipboard'"))
-
--- Notifications (mako)
-hl.bind(mainMod .. " + N",          hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dismiss"))     -- dismiss newest
-hl.bind(mainMod .. " + SHIFT + N",  hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dismiss-all")) -- dismiss all
-hl.bind(mainMod .. " + CTRL + N",   hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify restore"))     -- show last again
-hl.bind(mainMod .. " + ALT + N",    hl.dsp.exec_cmd("$HOME/.local/bin/hypr-notify dnd"))         -- do not disturb
-
-hl.bind(mainMod .. " + L",          hl.dsp.exec_cmd("$HOME/.local/bin/hypr-power lock"))    -- lock screen
-hl.bind(mainMod .. " + Escape",     hl.dsp.exec_cmd("$HOME/.local/bin/hypr-power menu"))    -- power menu
-
--- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
-
--- Swap the focused window with its neighbour (also across monitors)
-hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.swap({ direction = "l" }))
-hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.swap({ direction = "r" }))
-hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.swap({ direction = "u" }))
-hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.swap({ direction = "d" }))
-
--- Switch workspaces with mainMod + [0-9]
--- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 10 do
-    local key = i % 10 -- 10 maps to key 0
-    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
-    hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+-- bind(keys, action, description, options)
+local function bind(keys, action, desc, opts)
+    -- Copy, so shared option tables (e.g. `held` below) never collect labels.
+    local o = {}
+    for k, v in pairs(opts or {}) do o[k] = v end
+    if desc then o.description = desc end
+    if next(o) then
+        return hl.bind(keys, action, o)
+    end
+    return hl.bind(keys, action)
 end
 
--- Special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + ALT + S",   hl.dsp.window.move({ workspace = "special:magic" }))   -- SHIFT+S is the area screenshot
+local function run(cmd) return hl.dsp.exec_cmd(cmd) end
 
--- Previous / next workspace on the current monitor (wraps around)
-hl.bind("CTRL + ALT + left",  hl.dsp.focus({ workspace = "m-1" }))
-hl.bind("CTRL + ALT + right", hl.dsp.focus({ workspace = "m+1" }))
--- ...and carry the focused window along
-hl.bind("CTRL + ALT + SHIFT + left",  hl.dsp.window.move({ workspace = "m-1" }))
-hl.bind("CTRL + ALT + SHIFT + right", hl.dsp.window.move({ workspace = "m+1" }))
+-- --- Apps -----------------------------------------------------------------------
 
--- Scroll through existing workspaces with mainMod + scroll
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+bind(mainMod .. " + Return",         run(programs.terminal),            "Apps: Terminal")
+bind(mainMod .. " + SHIFT + Return", run(bin .. "hypr-dropdown"),       "Apps: Drop-down terminal (toggle)")
+bind(mainMod .. " + E",              run(programs.fileManager),         "Apps: File manager")
+bind(mainMod .. " + space",          run(programs.menu),                "Apps: App launcher")
+bind(mainMod .. " + period",         run("rofimoji --action copy --skin-tone neutral"), "Apps: Emoji / symbols (copies)")
+bind(mainMod .. " + equal",          run(bin .. "hypr-calc"),           "Apps: Calculator")
+bind(mainMod .. " + SHIFT + V",      run(bin .. "hypr-clipboard"),      "Apps: Clipboard history")
+bind(mainMod .. " + SHIFT + C",      run("c=$(hyprpicker -a -f hex) && notify-send -a 'Color picker' \"$c\" 'Copied to clipboard'"),
+                                                                        "Apps: Color picker (copies the hex code)")
+bind(mainMod .. " + slash",          run(bin .. "hypr-keys"),           "Apps: Keybinding cheat sheet")
 
--- Move/resize windows with mainMod + LMB/RMB and dragging
-hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+-- --- Windows --------------------------------------------------------------------
 
--- Multimedia keys for volume and LCD brightness
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
+local closeWindowBind = bind(mainMod .. " + C", hl.dsp.window.close(), "Windows: Close window")
+-- closeWindowBind:set_enabled(false)
+bind(mainMod .. " + V",   hl.dsp.window.float({ action = "toggle" }), "Windows: Toggle floating")
+bind(mainMod .. " + P",   hl.dsp.window.pseudo(),                     "Windows: Pseudo-tile")
+bind(mainMod .. " + J",   hl.dsp.layout("togglesplit"),               "Windows: Toggle split direction") -- dwindle only
+bind(mainMod .. " + Tab", run(bin .. "hypr-windows"),                 "Windows: Window switcher (all workspaces)")
+
+-- Move focus / swap with the neighbour (also across monitors)
+bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }),  "Windows: Move focus|arrows")
+bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
+bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+
+bind(mainMod .. " + SHIFT + left",  hl.dsp.window.swap({ direction = "l" }), "Windows: Swap with neighbour|arrows")
+bind(mainMod .. " + SHIFT + right", hl.dsp.window.swap({ direction = "r" }))
+bind(mainMod .. " + SHIFT + up",    hl.dsp.window.swap({ direction = "u" }))
+bind(mainMod .. " + SHIFT + down",  hl.dsp.window.swap({ direction = "d" }))
+
+-- Move / resize with the mouse
+bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   "Windows: Move (drop on a window to swap)", { mouse = true })
+bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), "Windows: Resize",                          { mouse = true })
+
+-- --- Workspaces -------------------------------------------------------------------
+
+for i = 1, 10 do
+    local key = i % 10 -- 10 maps to key 0
+    bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }),
+         i == 1 and "Workspaces: Go to workspace|1…0" or nil)
+    bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }),
+         i == 1 and "Workspaces: Move window to workspace|1…0" or nil)
+end
+
+-- Previous / next workspace on the current monitor (wraps); SHIFT carries the window
+bind("CTRL + ALT + left",          hl.dsp.focus({ workspace = "m-1" }),       "Workspaces: Previous / next on this monitor|← / →")
+bind("CTRL + ALT + right",         hl.dsp.focus({ workspace = "m+1" }))
+bind("CTRL + ALT + SHIFT + left",  hl.dsp.window.move({ workspace = "m-1" }), "Workspaces: Carry window to previous / next|← / →")
+bind("CTRL + ALT + SHIFT + right", hl.dsp.window.move({ workspace = "m+1" }))
+
+bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), "Workspaces: Next / previous|scroll")
+bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+
+-- Scratchpad (special workspace). SUPER+SHIFT+S is the area screenshot.
+bind(mainMod .. " + S",       hl.dsp.workspace.toggle_special("magic"),            "Workspaces: Show / hide scratchpad")
+bind(mainMod .. " + ALT + S", hl.dsp.window.move({ workspace = "special:magic" }), "Workspaces: Move window to scratchpad")
+
+-- --- Screenshots (hypr-screenshot: ~/Pictures/Screenshots + clipboard) -------------
+
+bind(mainMod .. " + SHIFT + S", run(bin .. "hypr-screenshot area"),   "Screenshots: Area (drag to select)")
+bind("Print",                   run(bin .. "hypr-screenshot area"),   "Screenshots: Area (drag to select)")
+bind("SHIFT + Print",           run(bin .. "hypr-screenshot screen"), "Screenshots: This monitor")
+bind("CTRL + Print",            run(bin .. "hypr-screenshot window"), "Screenshots: Active window")
+bind(mainMod .. " + Print",     run(bin .. "hypr-screenshot menu"),   "Screenshots: Menu (with delays)")
+bind(mainMod .. " + SHIFT + X", run(bin .. "hypr-screenshot text"),   "Screenshots: Copy the text in an area (OCR)")
+
+-- --- Notifications (mako) ---------------------------------------------------------
+
+bind(mainMod .. " + N",         run(bin .. "hypr-notify dismiss"),     "Notifications: Dismiss newest")
+bind(mainMod .. " + SHIFT + N", run(bin .. "hypr-notify dismiss-all"), "Notifications: Dismiss all")
+bind(mainMod .. " + CTRL + N",  run(bin .. "hypr-notify restore"),     "Notifications: Bring back the last one")
+bind(mainMod .. " + ALT + N",   run(bin .. "hypr-notify dnd"),         "Notifications: Do not disturb")
+
+-- --- System -----------------------------------------------------------------------
+
+bind(mainMod .. " + L",         run(bin .. "hypr-power lock"),    "System: Lock screen")
+bind(mainMod .. " + Escape",    run(bin .. "hypr-power menu"),    "System: Power menu")
+bind(mainMod .. " + M",         run("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"),
+                                                                  "System: Exit Hyprland")
+bind(mainMod .. " + SHIFT + T", run(bin .. "hypr-theme toggle"),  "System: Switch light / dark theme")
+bind(mainMod .. " + SHIFT + R", run(bin .. "hypr-reload"),        "System: Reload all configs")
+
+-- --- Media keys (work on the lock screen too) -------------------------------------
+
+local held = { locked = true, repeating = true }
+bind("XF86AudioRaiseVolume",  run("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), "Media: Volume up / down|volume keys", held)
+bind("XF86AudioLowerVolume",  run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      nil, held)
+bind("XF86AudioMute",         run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     "Media: Mute", held)
+bind("XF86AudioMicMute",      run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   "Media: Mute microphone", held)
+bind("XF86MonBrightnessUp",   run("brightnessctl -e4 -n2 set 5%+"),                  "Media: Brightness up / down|brightness keys", held)
+bind("XF86MonBrightnessDown", run("brightnessctl -e4 -n2 set 5%-"),                  nil, held)
 
 -- Requires playerctl
-hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
-hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+local locked = { locked = true }
+bind("XF86AudioPlay",  run("playerctl play-pause"), "Media: Play / pause", locked)
+bind("XF86AudioPause", run("playerctl play-pause"), nil, locked)
+bind("XF86AudioNext",  run("playerctl next"),       "Media: Next / previous track|next / previous keys", locked)
+bind("XF86AudioPrev",  run("playerctl previous"),   nil, locked)

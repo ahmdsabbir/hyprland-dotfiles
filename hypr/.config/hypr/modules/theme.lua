@@ -10,11 +10,11 @@
 
 local DEFAULT = "light"
 
--- ~/.local/state/hyprland-dotfiles/theme, written by hypr-theme.
+-- ~/.local/state/yonko/theme, written by hypr-theme.
 local function saved_name()
     local home  = os.getenv("HOME") or ""
     local state = os.getenv("XDG_STATE_HOME") or (home .. "/.local/state")
-    local f = io.open(state .. "/hyprland-dotfiles/theme", "r")
+    local f = io.open(state .. "/yonko/theme", "r")
     if not f then return nil end
     local name = f:read("l")
     f:close()

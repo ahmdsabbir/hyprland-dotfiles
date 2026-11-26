@@ -33,7 +33,7 @@ while :; do
         -display-columns 2 -display-column-separator $'\t' \
         -kb-delete-entry "" -kb-custom-1 "shift+Delete" \
         -mesg "$hint" \
-        -theme-str 'entry { placeholder: "Search clipboard history"; } element { padding: 10px 14px; }')"
+        -theme-str 'entry { placeholder: "Search clipboard history"; } element { children: [ element-text ]; padding: 10px 14px; }')"
     status=$?
 
     case "$status" in

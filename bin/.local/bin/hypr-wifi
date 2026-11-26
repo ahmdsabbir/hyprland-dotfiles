@@ -17,7 +17,7 @@ settings() { exec kitty --class hypr-nmtui -e nmtui; }
 
 menu() {  # rows on stdin; prints picked index
     rofi -dmenu -i -format i -no-show-icons -p wifi \
-        -theme-str "entry { placeholder: \"$1\"; } element { padding: 10px 14px; }"
+        -theme-str "entry { placeholder: \"$1\"; } element { children: [ element-text ]; padding: 10px 14px; }"
 }
 
 fail() { rofi -e "$1"; exit 1; }

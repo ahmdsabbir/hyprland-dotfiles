@@ -8,14 +8,14 @@
 #   --keep-packages   Leave apt packages and the PPA installed.
 #   --yes             Don't ask before removing packages.
 #
-# Only things recorded in ~/.local/state/hyprland-dotfiles/changes.log are
+# Only things recorded in ~/.local/state/yonko/changes.log are
 # undone, so packages you already had before install.sh are never removed.
 # Only symlinks pointing into this repo are deleted.
 
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/yonko"
 STATE_LOG="$STATE_DIR/changes.log"
 
 DRY_RUN=0

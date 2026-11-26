@@ -19,6 +19,9 @@ grim
 slurp
 hyprpicker
 swappy
+# Copy text from the screen (SUPER+SHIFT+X): OCR engine + English
+tesseract-ocr
+tesseract-ocr-eng
 
 # Notifications (+ notify-send for scripts)
 mako-notifier

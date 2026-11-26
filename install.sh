@@ -10,13 +10,13 @@
 #
 # Safe to re-run. Existing files that would block a link are moved to
 # <file>.bak.<timestamp>, never deleted. Every change is recorded in
-# ~/.local/state/hyprland-dotfiles/changes.log so ./uninstall.sh can undo it.
+# ~/.local/state/yonko/changes.log so ./uninstall.sh can undo it.
 
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TS="$(date +%Y%m%d-%H%M%S)"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/yonko"
 STATE_LOG="$STATE_DIR/changes.log"
 
 # Distro menu: id, label. A distro is supported once it has

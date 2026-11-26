@@ -5,13 +5,14 @@
 #        hypr-screenshot screen        the focused monitor              SHIFT+Print
 #        hypr-screenshot window        the active window                CTRL+Print
 #        hypr-screenshot all           every monitor
+#        hypr-screenshot text          copy the TEXT in an area (OCR)   SUPER+SHIFT+X
 #        hypr-screenshot menu          pick one in rofi (+ delays)      SUPER+Print
 #
 #   --delay N   wait N seconds first (e.g. to open a menu)
 #
 # A notification shows the result: click it to annotate (swappy), or "Open".
 # Needs grim, slurp, wl-clipboard; hyprpicker freezes the screen while
-# selecting an area (optional).
+# selecting an area (optional); `text` needs tesseract.
 
 set -uo pipefail
 
@@ -54,11 +55,47 @@ fi
 
 palette_color() {  # key -> hex (no #), from the current theme's .colors file
     local theme="light" file
-    [[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles/theme" ]] \
-        && read -r theme < "${XDG_STATE_HOME:-$HOME/.local/state}/hyprland-dotfiles/theme"
+    [[ -f "${XDG_STATE_HOME:-$HOME/.local/state}/yonko/theme" ]] \
+        && read -r theme < "${XDG_STATE_HOME:-$HOME/.local/state}/yonko/theme"
     file="$CFG/hypr/themes/$theme.colors"
     [[ -f "$file" ]] && sed -nE "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*([0-9a-fA-F]{6}).*/\1/p" "$file" | head -n1
 }
+
+# Drag to select an area (screen frozen meanwhile); sets $geometry, exits on Esc.
+select_area() {
+    command -v slurp >/dev/null || die "slurp is not installed"
+    local frame freeze_pid="" status
+    frame="$(palette_color accent)"; frame="${frame:-474747}"
+    # Freeze the screen so menus/tooltips stay put while selecting.
+    if command -v hyprpicker >/dev/null; then
+        hyprpicker -r -z >/dev/null 2>&1 & freeze_pid=$!
+        sleep 0.1
+    fi
+    geometry="$(slurp -d -b 00000033 -c "${frame}ff" -s 00000000 -w 2)"
+    status=$?
+    [[ -n "$freeze_pid" ]] && kill "$freeze_pid" 2>/dev/null
+    (( status == 0 )) && [[ -n "$geometry" ]] || exit 0   # Esc: cancelled
+    sleep 0.05
+}
+
+# --- Text (OCR): nothing is saved, only the text is copied -------------------------
+
+if [[ "$mode" == text ]]; then
+    command -v tesseract >/dev/null || die "tesseract is not installed (see packages.ubuntu.txt)"
+    select_area
+    # Capture at 2x: OCR reads small UI text much better when upscaled.
+    # Trailing spaces trimmed; leading blank lines dropped ($(...) drops trailing ones).
+    text="$(grim -s 2 -g "$geometry" - | tesseract - - 2>/dev/null \
+        | sed 's/[[:space:]]*$//' | awk 'NF { started = 1 } started')"
+    if [[ -z "${text//[[:space:]]/}" ]]; then
+        notify-send -u low -a "Copy text" "No text found" "Try selecting a larger area" 2>/dev/null
+        exit 0
+    fi
+    printf '%s' "$text" | wl-copy
+    preview="$(printf '%s' "$text" | head -c 200)"
+    notify-send -a "Copy text" "Text copied" "$preview" 2>/dev/null
+    exit 0
+fi
 
 # --- Capture -------------------------------------------------------------------
 
@@ -72,19 +109,7 @@ fi
 
 case "$mode" in
     area)
-        command -v slurp >/dev/null || die "slurp is not installed"
-        frame="$(palette_color accent)"; frame="${frame:-474747}"
-        # Freeze the screen so menus/tooltips stay put while selecting.
-        freeze_pid=""
-        if command -v hyprpicker >/dev/null; then
-            hyprpicker -r -z >/dev/null 2>&1 & freeze_pid=$!
-            sleep 0.1
-        fi
-        geometry="$(slurp -d -b 00000033 -c "${frame}ff" -s 00000000 -w 2)"
-        status=$?
-        [[ -n "$freeze_pid" ]] && kill "$freeze_pid" 2>/dev/null
-        (( status == 0 )) && [[ -n "$geometry" ]] || exit 0   # Esc: cancelled
-        sleep 0.05
+        select_area
         grim -g "$geometry" "$file" || die "capture failed"
         ;;
     window)
@@ -107,9 +132,9 @@ print(next((m["name"] for m in json.load(sys.stdin) if m.get("focused")), ""))
         grim "$file" || die "capture failed"
         ;;
     -h|--help|"")
-        sed -n '2,15p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        sed -n '2,16p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *)
-        die "unknown mode: $mode (area|screen|window|all|menu)" ;;
+        die "unknown mode: $mode (area|screen|window|all|text|menu)" ;;
 esac
 
 wl-copy --type image/png < "$file"

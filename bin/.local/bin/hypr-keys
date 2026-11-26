@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Keybinding cheat sheet (SUPER+/): every shortcut, searchable, in rofi.
+#
+# Usage: hypr-keys            show it in rofi
+#        hypr-keys --print    print it in the terminal
+#
+# Read live from the running Hyprland (`hyprctl binds -j`), using the
+# descriptions set in modules/keybinds.lua ("Category: what it does", with an
+# optional "|label" for a family of keys), so it is always in sync.
+
+set -uo pipefail
+
+table="$(hyprctl binds -j | python3 -c '
+import json, sys
+
+ORDER = ["Apps", "Windows", "Workspaces", "Screenshots", "Notifications", "System", "Media"]
+
+# Modifier bits, shown in this order.
+MODS = [(64, "SUPER"), (4, "CTRL"), (8, "ALT"), (1, "SHIFT")]
+
+NAMES = {
+    "Return": "Enter", "space": "Space", "grave": "`", "period": ".", "equal": "=",
+    "slash": "/", "Escape": "Esc", "Tab": "Tab", "Print": "Print",
+    "left": "←", "right": "→", "up": "↑", "down": "↓",
+    "mouse:272": "left drag", "mouse:273": "right drag",
+    "mouse_down": "scroll", "mouse_up": "scroll",
+    "XF86AudioRaiseVolume": "volume up", "XF86AudioLowerVolume": "volume down",
+    "XF86AudioMute": "mute key", "XF86AudioMicMute": "mic mute key",
+    "XF86MonBrightnessUp": "brightness up", "XF86MonBrightnessDown": "brightness down",
+    "XF86AudioPlay": "play key", "XF86AudioPause": "pause key",
+    "XF86AudioNext": "next key", "XF86AudioPrev": "previous key",
+}
+
+rows, seen = [], set()
+for b in json.load(sys.stdin):
+    desc = b.get("description") or ""
+    if not desc:
+        continue
+    label = None
+    if "|" in desc:
+        desc, label = desc.split("|", 1)
+    category, _, what = desc.partition(": ")
+    if not what:
+        category, what = "Other", desc
+    key = label or NAMES.get(b["key"], b["key"].upper() if len(b["key"]) == 1 else b["key"])
+    mods = [name for bit, name in MODS if b["modmask"] & bit]
+    combo = " + ".join(mods + [key])
+    if (category, combo, what) in seen:
+        continue
+    seen.add((category, combo, what))
+    rank = ORDER.index(category) if category in ORDER else len(ORDER)
+    rows.append((rank, category, combo, what))
+
+rows.sort(key=lambda r: r[0])   # stable: keeps the order from keybinds.lua
+width = max((len(r[2]) for r in rows), default=10) + 3
+for _, category, combo, what in rows:
+    print(f"{category:<14}{combo:<{width}}{what}")
+')" || { echo "hypr-keys: could not read binds from Hyprland" >&2; exit 1; }
+
+if [[ "${1:-}" == "--print" ]]; then
+    printf '%s\n' "$table"
+    exit 0
+fi
+
+printf '%s\n' "$table" | rofi -dmenu -i -p keys -no-show-icons -no-custom \
+    -mesg "Type to search shortcuts · Esc to close" \
+    -theme-str 'mainbox { width: 1060px; } entry { placeholder: "Search shortcuts"; } listview { lines: 16; } element { children: [ element-text ]; padding: 6px 14px; }' \
+    >/dev/null || true

@@ -3,10 +3,10 @@
 #   ~ ❯                                   home / plain folders: one line
 #   ~/Downloads ❯
 #
-#   hyprland-dotfiles on ⎇ main ⇡1 !1 ?1  in a git repo: info line + input line
+#   yonko on ⎇ main ⇡1 !1 ?1              in a git repo: info line + input line
 #   ❯
 #
-#   hyprland-dotfiles on ⎇ main !1        after a failed, slow command
+#   yonko on ⎇ main !1                    after a failed, slow command
 #   ✗ 1 ❯                          took 12s
 #
 # Ink + one green accent, using only the terminal's 16 theme colors so it
